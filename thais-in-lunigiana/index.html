@@ -11,12 +11,12 @@
 </head>
 <body>
 <div id="stage"></div><div id="wash"></div><div id="progress"></div>
-<div id="brand"><small>Cozy Paw Worlds · WebGPU P02</small><b>Thais in Lunigiana</b></div>
+<div id="brand"><small>Cozy Paw Worlds · WebGPU P03</small><b>Thais in Lunigiana</b></div>
 <div id="top"><button id="quality" type="button">Qualità: Alta</button><button id="menu" type="button">☰ Menu</button></div>
 <div id="hud"><strong>La via della Torre</strong><span>WASD · Mouse · Shift per correre · Esc per il menu</span><em id="stats">WebGPU · in preparazione</em></div>
 <div id="credit"><b>Verrucola</b>ispirato ai borghi della Lunigiana</div>
 <div id="touch"><div id="stick"><div id="nub"></div></div><div id="touchLabel">Trascina per guardare ↗</div></div><div id="reticle"></div>
-<div id="overlay"><div id="panel"><div class="eyebrow">Lunigiana · un borgo generato dalla matematica</div><h1>Thais <i>in</i><br>Lunigiana</h1><h2>La via della Torre</h2><p>La luce del pomeriggio attraversa i vicoli in pietra, il vento muove le fronde dei castagni e un antico borgo prende forma. Una prima passeggiata in un nuovo mondo procedurale.</p><button id="start" type="button">✦ Esplora il borgo</button><div id="note">Prototipo nativo WebGPU, completamente indipendente dalla versione WebGL. Ispirato a Verrucola, non una ricostruzione topografica. Thais giocabile e missioni arriveranno dopo la valutazione dell'ambiente.</div></div></div>
+<div id="overlay"><div id="panel"><div class="eyebrow">Lunigiana · un borgo generato dalla matematica</div><h1>Thais <i>in</i><br>Lunigiana</h1><h2>La via della Torre</h2><p>La luce del pomeriggio attraversa i vicoli in pietra, il vento muove le fronde dei castagni e un antico borgo prende forma. Una prima passeggiata in un nuovo mondo procedurale.</p><button id="start" type="button">✦ Esplora il borgo</button><div id="note">Prototipo WebGPU P03: materiali generati sulla GPU con la metodologia di Abyssal Garden (mipmap, triplanar e normali). Ispirato a Verrucola, non una ricostruzione topografica. Thais giocabile e missioni arriveranno dopo la valutazione dell'ambiente.</div></div></div>
 <div id="status">Generazione procedurale in corso…</div><div id="failure" role="alert"></div>
 <script type="module">
 /* Thais in Lunigiana — native WebGPU village renderer.
@@ -48,7 +48,7 @@ function norm(a){let l=Math.hypot(...a)||1;return a.map(x=>x/l)};
 function poly(a,b,c,color,material=10,ao=1){const n=norm(cross(minus(b,a),minus(c,a)));for(const p of [a,b,c])mesh.push(...p,...n,0,0,...color,material)}
 function quad(a,b,c,d,color,material=10){poly(a,b,c,color,material);poly(a,c,d,color,material)}
 function beam(a,b,r,material,tint=[1,1,1],faces=7){let dir=minus(b,a),len=Math.hypot(...dir);if(len<.01)return;dir=norm(dir);let side=norm(cross(dir,Math.abs(dir[1])>.92?[1,0,0]:[0,1,0])),up=cross(dir,side);for(let i=0;i<faces;i++){let t=i*2*Math.PI/faces,u=(i+1)*2*Math.PI/faces;let q1=side.map((v,j)=>v*Math.cos(t)*r+up[j]*Math.sin(t)*r),q2=side.map((v,j)=>v*Math.cos(u)*r+up[j]*Math.sin(u)*r);const f=(point,offset)=>point.map((v,j)=>v+offset[j]);quad(f(a,q1),f(a,q2),f(b,q2),f(b,q1),tint,material)}}
-function arch(cx,cy,cz,outer,inner,depth,material,blocks=12){for(let i=0;i<blocks;i++){const a=Math.PI*i/blocks,b=Math.PI*(i+1)/blocks;const xo=Math.cos(a)*outer,yo=Math.sin(a)*outer,xi=Math.cos(a)*inner,yi=Math.sin(a)*inner;const XO=Math.cos(b)*outer,YO=Math.sin(b)*outer,XI=Math.cos(b)*inner,YI=Math.sin(b)*inner;let c=shade([.92,.85,.73],.21);let p=(x,y,z)=>[cx+x,cy+y,cz+z];quad(p(xo,yo,-depth/2),p(XO,YO,-depth/2),p(XI,YI,-depth/2),p(xi,yi,-depth/2),c,material);quad(p(xi,yi,depth/2),p(XI,YI,depth/2),p(XO,YO,depth/2),p(xo,yo,depth/2),c,material);quad(p(xi,yi,-depth/2),p(XI,YI,-depth/2),p(XI,YI,depth/2),p(xi,yi,depth/2),c,material);quad(p(xo,yo,depth/2),p(XO,YO,depth/2),p(XO,YO,-depth/2),p(xo,yo,-depth/2),c,material)}}
+function arch(cx,cy,cz,outer,inner,depth,material,blocks=12){for(let i=0;i<blocks;i++){const a=Math.PI*i/blocks,b=Math.PI*(i+1)/blocks;const xo=Math.cos(a)*outer,yo=Math.sin(a)*outer,xi=Math.cos(a)*inner,yi=Math.sin(a)*inner;const XO=Math.cos(b)*outer,YO=Math.sin(b)*outer,XI=Math.cos(b)*inner,YI=Math.sin(b)*inner;let c=shade([.78,.75,.68],.065);let p=(x,y,z)=>[cx+x,cy+y,cz+z];quad(p(xo,yo,-depth/2),p(XO,YO,-depth/2),p(XI,YI,-depth/2),p(xi,yi,-depth/2),c,material);quad(p(xi,yi,depth/2),p(XI,YI,depth/2),p(XO,YO,depth/2),p(xo,yo,depth/2),c,material);quad(p(xi,yi,-depth/2),p(XI,YI,-depth/2),p(XI,YI,depth/2),p(xi,yi,depth/2),c,material);quad(p(xo,yo,depth/2),p(XO,YO,depth/2),p(XO,YO,-depth/2),p(xo,yo,-depth/2),c,material)}}
 
 function castleTower(cx,cy,cz,width=7,height=15){
  const base=[.88,.87,.79];put(cx,cy+height*.5,cz,width,height,width,M.DARK,base);
@@ -65,10 +65,10 @@ function castleTower(cx,cy,cz,width=7,height=15){
 
 // Raised narrow road formed from irregular flagstones, not repeating painted squares.
 status.textContent='Scultura della strada e delle case…';bar.style.width='15%';
-for(let z=29;z>-55;z-=.42){let x=-3.45;while(x<3.48){let w=rr(.22,.68),dz=rr(.30,.55),xx=bends(z)+x+w*.5+rr(-.09,.09),yy=targetRoad(z)+rr(-.018,.028);const c=shade(pick([[.82,.82,.76],[.72,.74,.7],[.65,.67,.62],[.90,.86,.76],[.79,.77,.7]]),.18);pebble(xx,yy,z+rr(-.12,.12),w*.9,rr(.045,.09),dz,c,rr(-.07,.07));x+=w+rr(.005,.055)}}
+for(let z=29;z>-55;z-=.42){let x=-3.45;while(x<3.48){let w=rr(.22,.68),dz=rr(.30,.55),xx=bends(z)+x+w*.5+rr(-.09,.09),yy=targetRoad(z)+rr(-.018,.028);const c=shade(pick([[.69,.68,.64],[.65,.65,.61],[.61,.63,.60],[.73,.69,.63],[.68,.65,.60]]),.068);pebble(xx,yy,z+rr(-.12,.12),w*.9,rr(.045,.09),dz,c,rr(-.07,.07));x+=w+rr(.005,.055)}}
 // Irregular central ruts and edge gutters; grass in mortar joints.
 for(let z=29;z>-55;z-=.92){for(const side of [-1,1]){
- let x=bends(z)+side*3.68,y=targetRoad(z)+.015;put(x,y,z,rr(.25,.4),.15,rr(.72,1.15),M.TRIM,shade([.65,.65,.58],.18),rr(-.12,.12));
+ let x=bends(z)+side*3.68,y=targetRoad(z)+.015;put(x,y,z,rr(.25,.4),.15,rr(.72,1.15),M.TRIM,shade([.66,.64,.59],.07),rr(-.12,.12));
  if(rnd()<.65){let r=rr(.06,.14);foliage(x+side*rr(-.14,.11),y+.11,z, r,rr(.23,.55),r,[.48,.66,.39]);}
  }}
 // Coarse terrain with sculpted ridges, cambered paths, embedded rocks and earth colors.
@@ -80,10 +80,10 @@ for(let j=0;j<N;j++)for(let i=0;i<N;i++){
 }
 function stoneWallFace(x,y,z,w,h,side,plastered=false){
  const ix=side===-1?x+.065:x-.065;
- if(plastered){put(x,y+h*.5,z,.23,h,w,M.PLASTER,shade([.95,.89,.78],.10));
+ if(plastered){put(x,y+h*.5,z,.23,h,w,M.PLASTER,shade([.80,.76,.67],.055));
    for(let v=0;v<14;v++){if(rnd()<.35){let a=rr(-w*.42,w*.42),q=rr(.8,h-.8);put(x+side*.135,y+q,z+a,.018,rr(.12,.4),rr(.2,.7),M.STONE,shade([.77,.74,.68],.12));}}return;
  }
- for(let cy=0;cy<h;){let H=rr(.29,.56),pos=-w*.5;while(pos<w*.5){let W=Math.min(w*.5-pos,rr(.45,1.12));if(W<.13)break;let yy=y+cy+H*.49,zz=z+pos+W*.5;const rim=rnd();let tint=shade(rim<.1?[.68,.69,.61]:rim<.25?[.8,.75,.66]:[.94,.90,.80],.16);
+ for(let cy=0;cy<h;){let H=rr(.29,.56),pos=-w*.5;while(pos<w*.5){let W=Math.min(w*.5-pos,rr(.45,1.12));if(W<.13)break;let yy=y+cy+H*.49,zz=z+pos+W*.5;const rim=rnd();let tint=shade(rim<.10?[.60,.61,.58]:rim<.31?[.74,.70,.62]:[.78,.75,.67],.065);
  put(x+side*rr(.03,.15),yy,zz,rr(.18,.31),H*.91,W*.98,M.STONE,tint,rr(-.015,.015),.83);pos+=W+rr(.006,.022)}cy+=H+rr(.012,.04)}
 }
 function windowOnFront(x,y,z,side,short=false){
@@ -145,7 +145,7 @@ function ivy(front,base,z,side,h){
 }
 function house(side,z,w,d,h,variation){
  const offset=rr(.0,.40),cx=bends(z)+side*(3.68+w*.5+.12+offset),y=targetRoad(z)-.17,front=cx-side*w*.5-side*.025;
- const pl=variation===1,base=variation===2?[.84,.84,.75]:[.92,.87,.77];
+ const pl=variation===1,base=variation===2?[.80,.78,.71]:[.82,.79,.72];
  // True building volume: side elevations, rear, corner buttresses
  put(cx,y+h*.48,z,w*.89,h*.96,d*.94,pl?M.PLASTER:M.DARK,shade(base,.08));
  // front relief masonry: not just a repeated UV brick texture
@@ -153,10 +153,10 @@ function house(side,z,w,d,h,variation){
  for(let end of [-1,1]){
    let zz=z+end*d*.5,sideWall=pl?M.PLASTER:M.STONE;
    put(cx,y+h*.48,zz,w*.94,h*.96,.31,sideWall,shade(base,.1));
-   for(let n=0;n<5;n++){let yy=y+rr(.5,h-1),xx=cx+rr(-w*.33,w*.33);if(rnd()<.5)put(xx,yy,zz+end*.17,rr(.26,.55),rr(.15,.36),.10,M.STONE,shade([.91,.90,.78],.13))}
+   for(let n=0;n<5;n++){let yy=y+rr(.5,h-1),xx=cx+rr(-w*.33,w*.33);if(rnd()<.5)put(xx,yy,zz+end*.17,rr(.26,.55),rr(.15,.36),.10,M.STONE,shade([.76,.73,.66],.07))}
  }
  // robust carved limestone quoins, each has a non-repeating size
- for(const zz of [z-d*.48,z+d*.48])for(let ht=.28;ht<h;ht+=.62){put(front+side*.12,y+ht,zz,.42,rr(.36,.55),rr(.54,.74),M.TRIM,shade([.88,.87,.79],.17));}
+ for(const zz of [z-d*.48,z+d*.48])for(let ht=.28;ht<h;ht+=.62){put(front+side*.12,y+ht,zz,.42,rr(.36,.55),rr(.54,.74),M.TRIM,shade([.76,.74,.68],.07));}
  // heavy stringcourses / rustic cornice with projecting shadows
  for(let ht=2.75;ht<h-1.1;ht+=2.8)put(front+side*.20,y+ht,z,.35,.14,d+.25,M.TRIM,shade([.86,.82,.72],.1));
  put(front+side*.20,y+h-.2,z,.53,.29,d+.5,M.TRIM,[.87,.85,.78]);
@@ -244,11 +244,101 @@ function lookAt(eye,center,up){let z=norm(vsub(eye,center)),x=norm(cross(up,z)),
 function persp(fov,aspect,n,f){let t=1/Math.tan(fov/2);return new Float32Array([t/aspect,0,0,0,0,t,0,0,0,0,f/(n-f),-1,0,0,f*n/(n-f),0])}
 function ortho(l,r,b,t,n,f){return new Float32Array([2/(r-l),0,0,0,0,2/(t-b),0,0,0,0,1/(n-f),0,-(r+l)/(r-l),-(t+b)/(t-b),n/(n-f),1])}
 
+/* Texture-baking WGSL adapted from Abyssal Garden by Maksymilian Dendura,
+   copyright (c) 2026, licensed MIT; see the parent project and LICENSE.
+   The surrounding architectural material shader is new to Thais in Lunigiana. */
+const detailShader=/* wgsl */`
+fn ss(a: f32, b: f32, x: f32) -> f32 { let t = clamp((x - a) / (b - a), 0., 1.); return t * t * (3. - 2. * t); }
+fn h31(p: vec3f) -> f32 { var q = fract(p * vec3f(.1031, .1030, .0973)); q += dot(q, q.yzx + 33.33); return fract((q.x + q.y) * q.z); }
+fn h33(p: vec3f) -> vec3f { var q = fract(p * vec3f(.1031, .1030, .0973)); q += dot(q, q.yxz + 33.33); return fract((q.xxy + q.yxx) * q.zyx); }
+fn vn(p: vec3f) -> f32 {
+  let i = floor(p); let f = fract(p); let u = f * f * (3. - 2. * f);
+  return mix(mix(mix(h31(i), h31(i + vec3f(1., 0., 0.)), u.x), mix(h31(i + vec3f(0., 1., 0.)), h31(i + vec3f(1., 1., 0.)), u.x), u.y),
+             mix(mix(h31(i + vec3f(0., 0., 1.)), h31(i + vec3f(1., 0., 1.)), u.x), mix(h31(i + vec3f(0., 1., 1.)), h31(i + vec3f(1., 1., 1.)), u.x), u.y), u.z);
+}
+fn fbm(p: vec3f, n: i32) -> f32 {
+  var a = .5; var s = 0.; var q = p;
+  for (var i = 0; i < n; i++) { s += a * vn(q); q = q * 2.03 + vec3f(17.1, 31.7, 5.3); a *= .5; }
+  return s / (1. - 2. * a);
+}
+fn wor(p: vec3f) -> f32 {
+  let i = floor(p); let f = fract(p); var d = 9.;
+  for (var x = -1; x <= 1; x++) { for (var y = -1; y <= 1; y++) { for (var z = -1; z <= 1; z++) {
+    let o = vec3f(f32(x), f32(y), f32(z)); let r = o + h33(i + o) - f; d = min(d, dot(r, r));
+  } } }
+  return sqrt(d);
+}
+
+
+@vertex fn vs(@builtin(vertex_index) i: u32) -> @builtin(position) vec4f { return vec4f(f32(i32(i & 1u) * 4 - 1), f32(i32(i >> 1u) * 4 - 1), 0., 1.); }
+
+
+fn hp(p: vec2f, per: f32) -> f32 { return h31(vec3f(p - per * floor(p / per), per)); }
+fn tn(p: vec2f, per: f32) -> f32 {
+  let i = floor(p); let f = fract(p); let u = f * f * (3. - 2. * f);
+  return mix(mix(hp(i, per), hp(i + vec2f(1., 0.), per), u.x), mix(hp(i + vec2f(0., 1.), per), hp(i + vec2f(1., 1.), per), u.x), u.y);
+}
+fn tf(uv: vec2f, per: f32, n: i32) -> f32 { var a = .5; var s = 0.; var pr = per; for (var i = 0; i < n; i++) { s += a * tn(uv * pr + f32(i) * 7.3, pr); pr *= 2.; a *= .5; } return s / (1. - 2. * a); }
+fn tw(p: vec2f, per: f32) -> vec3f {
+  let i = floor(p); let f = fract(p); var d = vec2f(9.); var id = 0.;
+  for (var x = -1; x <= 1; x++) { for (var y = -1; y <= 1; y++) {
+    let o = vec2f(f32(x), f32(y)); let c = i + o; let cw = c - per * floor(c / per);
+    let hh = h33(vec3f(cw, per)); let r = o + hh.xy - f; let l = dot(r, r);
+    if (l < d.x) { d.y = d.x; d.x = l; id = hh.z; } else if (l < d.y) { d.y = l; }
+  } }
+  return vec3f(sqrt(d), id);
+}
+fn H(uv: vec2f) -> f32 {
+  let wq = uv + .11 * (vec2f(tf(uv, 3., 4), tf(uv + .5, 3., 4)) - .5);
+  let f = tf(wq, 3., 8);
+  let r1 = 1. - abs(tf(wq + 1.7, 5., 6) * 2. - 1.);
+  let cr = min(abs(tf(wq + 4.1, 4., 5) * 2. - 1.) * 7., 1.);
+  let cr2 = min(abs(tf(wq.yx + 2.3, 9., 4) * 2. - 1.) * 9., 1.);
+  let pt = tw(wq * 29., 29.);
+  let pit = (1. - ss(.0, .34, pt.x)) * step(.62, pt.z);
+  return f * .50 + r1 * r1 * .24 + cr * cr2 * .26 - pit * .07;
+}
+@fragment fn fs(@builtin(position) fc: vec4f) -> @location(0) vec4f {
+  let uv = fc.xy / 1024.; let e = 1. / 1024.;
+  let h = H(uv);
+  let gx = H(uv + vec2f(e, 0.)) - H(uv - vec2f(e, 0.)); let gy = H(uv + vec2f(0., e)) - H(uv - vec2f(0., e));
+  let s = clamp(vec2f(gx, gy) * 1024. * .5 * .075, vec2f(-1.), vec2f(1.));
+  return vec4f(-s * .5 + .5, h, tf(uv + 3.7, 3., 5));
+}
+`;
+const mipShader=/* wgsl */`
+@vertex fn vs(@builtin(vertex_index) i:u32)->@builtin(position) vec4f {
+ let xy=vec2f(f32(i32(i&1u)*4-1),f32(i32(i>>1u)*4-1));return vec4f(xy,0.,1.);
+}
+@group(0) @binding(0) var source:texture_2d<f32>;
+@group(0) @binding(1) var filtering:sampler;
+@fragment fn fs(@builtin(position) p:vec4f)->@location(0) vec4f{
+ let uv=p.xy*2./vec2f(textureDimensions(source));
+ return textureSampleLevel(source,filtering,uv,0.);
+}`;
 const shader=/* wgsl */`
 struct Scene { vp: mat4x4f, lightVP: mat4x4f, camera: vec4f, sunlight: vec4f, sky: vec4f, resolution: vec4f };
 @group(0) @binding(0) var<uniform> U: Scene;
 @group(0) @binding(1) var shadowMap: texture_depth_2d;
 @group(0) @binding(2) var shadowSampler: sampler_comparison;
+
+@group(0) @binding(3) var detailTexture:texture_2d<f32>;
+@group(0) @binding(4) var detailSampler:sampler;
+struct Detail { h:f32, c:f32, n:vec3f };
+fn triplanar(p:vec3f,normal:vec3f,s:f32)->Detail{
+ var weight=pow(abs(normalize(normal)),vec3f(4.));
+ weight/=max(weight.x+weight.y+weight.z,.0001);
+ let ax=textureSample(detailTexture,detailSampler,p.zy*s);
+ let ay=textureSample(detailTexture,detailSampler,p.xz*s);
+ let az=textureSample(detailTexture,detailSampler,p.xy*s);
+ var d:Detail;
+ d.h=ax.b*weight.x+ay.b*weight.y+az.b*weight.z;
+ d.c=ax.a*weight.x+ay.a*weight.y+az.a*weight.z;
+ let nx=ax.rg*2.-vec2f(1.);let ny=ay.rg*2.-vec2f(1.);let nz=az.rg*2.-vec2f(1.);
+ d.n=vec3f(0.,nx.y,nx.x)*weight.x+vec3f(ny.x,0.,ny.y)*weight.y+vec3f(nz.x,nz.y,0.)*weight.z;
+ return d;
+}
+
 struct Out { @builtin(position) pos: vec4f, @location(0) wp: vec3f, @location(1) n: vec3f, @location(2) col: vec3f, @location(3) material: f32, @location(4) shadow: vec4f, @location(5) uv: vec2f };
 struct MeshIn { @location(0) pos: vec3f, @location(1) norm: vec3f, @location(2) uv: vec2f, @location(3) tint: vec4f };
 struct InstIn { @location(0) p: vec3f, @location(1) n: vec3f, @location(2) uv: vec2f, @location(3) posMat: vec4f, @location(4) dimYaw: vec4f, @location(5) tint: vec4f };
@@ -275,79 +365,97 @@ fn noise(p:vec3f)->f32{let i=floor(p);let f=fract(p);let a=f*f*(3.-2.*f);
  return mix(mix(x,y,a.y),mix(z,w,a.y),a.z);
 }
 fn fbm(p:vec3f)->f32{var v=0.;var a=.5;var q=p;for(var i=0;i<4;i++){v+=noise(q)*a;q=q*2.02+vec3f(7.9,19.1,31.7);a*=.5;}return v;}
+
 fn sunShadow(i:Out)->f32{
  let q=i.shadow.xyz/i.shadow.w;
  let uv=vec2f(q.x*.5+.5,.5-q.y*.5);
  if(uv.x<0.||uv.x>1.||uv.y<0.||uv.y>1.||q.z<0.||q.z>1.){return 1.;}
- var shade=0.;let res=1./2048.;let bias=.0015;
+ var a=0.;let texel=1.5/2048.;
  for(var x=-1;x<=1;x++){for(var y=-1;y<=1;y++){
-    shade+=textureSampleCompareLevel(shadowMap,shadowSampler,uv+vec2f(f32(x),f32(y))*res,q.z-bias);
- }}return shade/9.;
+  a+=textureSampleCompareLevel(shadowMap,shadowSampler,uv+vec2f(f32(x),f32(y))*texel,q.z-.0013);
+ }}
+ return a/9.;
 }
-fn finish(col:vec3f,wp:vec3f,n:vec3f,mat:f32,shadow:f32)->vec3f{
- let d=length(U.camera.xyz-wp);
- let L=normalize(U.sunlight.xyz);let V=normalize(U.camera.xyz-wp);let N=normalize(n);
- let nd=max(dot(N,L),0.);
- let occl=select(select(1.,.76,mat==8.),.91,mat==5.);
- let ambient=vec3f(.31,.39,.45)*.72 + vec3f(.70,.50,.32)*.17;
- var c=col*(ambient*occl + vec3f(1.25,1.08,.78)*nd*shadow*U.sunlight.w);
- let rough=select(select(.95,.6,mat==7.),.18,mat==8.);
- let hv=normalize(L+V);let spec=pow(max(dot(N,hv),0.), mix(56.,7.,rough))*(1.-rough*.64)*shadow;
- c+=vec3f(1.2,1.03,.76)*spec*.48;
- if(mat==8.){c+=vec3f(.06,.10,.11);}
- if(mat==12.){c+=col*.10;}
- let f=1.-exp(-pow(d*.0118,1.35));
- let atmos=mix(vec3f(.52,.62,.61),vec3f(.77,.73,.57),smoothstep(0.,1.,clamp((wp.y+6.)/28.,0.,1.)));
- return mix(c,atmos,f*.86);
+fn lightMaterial(albedo:vec3f,p:vec3f,n:vec3f,mat:f32,shadow:f32,rough:f32)->vec3f{
+ let d=length(U.camera.xyz-p);
+ let L=normalize(U.sunlight.xyz);
+ let V=normalize(U.camera.xyz-p);
+ let N=normalize(n);
+ let sky=max(0.,N.y*.5+.5);
+ let ambient=mix(vec3f(.14,.17,.21),vec3f(.33,.36,.39),sky);
+ let bounce=vec3f(.12,.095,.071)*(1.-sky);
+ let sunlight=vec3f(1.10,.89,.68)*max(dot(N,L),0.)*shadow*U.sunlight.w;
+ var c=albedo*(ambient+bounce+sunlight);
+ let H=normalize(V+L);
+ let spec=pow(max(dot(N,H),0.),mix(80.,13.,rough))*(1.-rough*.7)*shadow;
+ c+=vec3f(1.05,.86,.62)*spec*.11;
+ if(mat==8.){c+=vec3f(.020,.030,.030);}
+ if(mat==12.){c+=albedo*.09;}
+ let haze=1.-exp(-max(0.,d-12.)*.006);
+ let air=mix(vec3f(.41,.49,.57),vec3f(.62,.61,.55),clamp((p.y+3.)/35.,0.,1.));
+ return mix(c,air,min(haze*.45,.27));
 }
-@fragment fn fsMain(i:Out)->@location(0) vec4f {
+@fragment fn fsMain(i:Out)->@location(0) vec4f{
  let mat=i.material;
- let grain=fbm(i.wp*vec3f(7.,8.,7.));
- let micro=noise(i.wp*42.);
+ let dist=length(U.camera.xyz-i.wp);
+ let a=triplanar(i.wp,i.n,.17);
+ let b=triplanar(i.wp+vec3f(17.2,8.4,29.7),i.n,1.40);
+ let grain=a.h*.67+b.h*.33;
+ let mottles=a.c*.72+b.c*.28;
  var col=i.col;
- let slab=fbm(i.wp*vec3f(.92,1.3,.9));
+ var rough=.91;
+ var bump=.65;
  if(mat==0.||mat==1.||mat==9.){
-   let strata=.5+.5*sin(i.wp.y*6.3+noise(i.wp*1.4)*3.);
-   let rock=clamp(.63+.48*fbm(i.wp*vec3f(2.5,2.,2.5))+.15*strata+.12*(micro-.5),.3,1.32);
-   let lichen=smoothstep(.60,.83,fbm(i.wp*.76+8.))*smoothstep(.2,.6,grain);
-   col=col*rock;col=mix(col,col*vec3f(.52,.64,.40),lichen*.36);
- } else if(mat==2.) {
-   let weather=fbm(i.wp*vec3f(1.45,1.8,1.45));
-   col*=.78+.42*weather+.09*micro;
-   let cracks=smoothstep(.66,.77,fbm(i.wp*2.8+12.));
-   col=mix(col,vec3f(.63,.52,.39)*col,cracks*.26);
- } else if(mat==3.){
-   let woodlines=sin(i.wp.y*54.+fbm(i.wp*4.)*9.);
-   col*=.73+.21*grain+.085*woodlines;
- } else if(mat==4.){
-   col*=.71+.48*grain+.14*sin(i.wp.z*18.+i.wp.x*3.);
- } else if(mat==5.){
-   col*=.72+.43*grain+.11*micro;
-   let moss=smoothstep(.69,.81,fbm(i.wp*vec3f(.6,.95,.6)+4.));
-   col=mix(col,col*vec3f(.52,.68,.46),moss*.18);
- } else if(mat==6.){
-   col*=.75+.54*grain;
- } else if(mat==10.){
-   let gr=fbm(i.wp*vec3f(.45,.24,.45));
-   col=mix(col*vec3f(.65,.63,.48),col*vec3f(.61,.94,.61),gr);
- } else if(mat==11.){
-   col*=.60+.7*grain;
+  let strata=.84+.16*sin(i.wp.y*4.8+a.h*4.);
+  col*=vec3f(.86,.86,.80)*(.51+.55*grain+.07*strata);
+  let lichen=smoothstep(.55,.80,mottles)*smoothstep(.38,.65,grain);
+  col=mix(col,col*vec3f(.54,.64,.43),lichen*.31);
+  rough=.94;bump=.86;
+ }else if(mat==2.){
+  col*=vec3f(.90,.83,.74)*(.60+.48*grain);
+  col=mix(col,col*vec3f(.62,.61,.55),smoothstep(.52,.76,mottles)*.12);
+  rough=.97;bump=.38;
+ }else if(mat==3.){
+  let fibres=.84+.16*sin(i.wp.y*38.+a.h*10.);
+  col*=vec3f(.87,.82,.76)*(.57+.46*grain)*fibres;
+  rough=.81;bump=.39;
+ }else if(mat==4.){
+  col*=vec3f(1.04,.82,.69)*(.52+.52*grain);
+  col=mix(col,col*vec3f(.72,.77,.74),smoothstep(.60,.86,mottles)*.14);
+  rough=.88;bump=.65;
+ }else if(mat==5.){
+  col*=vec3f(.84,.85,.80)*(.48+.65*grain);
+  let moss=smoothstep(.64,.85,mottles)*smoothstep(.54,.78,grain);
+  col=mix(col,col*vec3f(.51,.63,.42),moss*.30);
+  rough=.98;bump=.91;
+ }else if(mat==6.){
+  col*=vec3f(.84,.99,.81)*(.65+.36*grain);
+  rough=.91;bump=.17;
+ }else if(mat==7.){
+  col*=.49+.42*grain;rough=.40;bump=.10;
+ }else if(mat==8.){
+  col*=.72+.23*grain;rough=.22;bump=.05;
+ }else if(mat==10.||mat==11.){
+  col*=vec3f(.83,.88,.73)*(.49+.59*grain);
+  rough=.94;bump=.69;
+ }else{
+  col*=.63+.44*grain;rough=.87;bump=.25;
  }
- let sh=sunShadow(i);
- let outc=finish(col,i.wp,i.n,mat,sh);
- return vec4f(outc,1.);
+ let influence=bump*mix(.95,.30,smoothstep(8.,65.,dist));
+ let normal=normalize(normalize(i.n)+(a.n*.74+b.n*.26)*influence);
+ return vec4f(lightMaterial(col,i.wp,normal,mat,sunShadow(i),rough),1.);
 }
 @vertex fn vsFull(@builtin(vertex_index) i:u32)->@builtin(position) vec4f{
  let xy=vec2f(f32(i32(i&1u)*4-1),f32(i32(i>>1u)*4-1));return vec4f(xy,.9999,1.);
 }
 @fragment fn fsSky(@builtin(position) q:vec4f)->@location(0) vec4f{
  let uv=q.xy/U.resolution.xy;let a=clamp(uv.y,0.,1.);
- var color=mix(vec3f(.90,.75,.52),vec3f(.35,.56,.69),smoothstep(.38,1.0,1.-a));
+ var color=mix(vec3f(.67,.56,.45),vec3f(.29,.44,.60),smoothstep(.22,.97,1.-a));
  let streaks=fbm(vec3f(uv.x*3.5,a*4.,U.camera.w*.004));
  let horizon=smoothstep(.55,.82,a);
- color=mix(color,vec3f(.94,.80,.63),horizon*.3);
+ color=mix(color,vec3f(.73,.64,.52),horizon*.23);
  let glimmer=exp(-length((uv-vec2f(.12,.30))*vec2f(1.,1.8))*6.);
- color+=vec3f(.56,.40,.17)*glimmer*.35;
+ color+=vec3f(.32,.22,.11)*glimmer*.18;
  let cloud=pow(max(0.,streaks-.43),1.5)*.35;
  color=mix(color,color+vec3f(.30,.27,.23),cloud);
  return vec4f(color,1.);
@@ -372,7 +480,7 @@ fn aces(x:vec3f)->vec3f{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),vec3f
    let bright=max(max(q.r,q.g),q.b);let w=exp(-dot(o,o)*25000.);
    b+=q*max(0.,bright-1.0)*w;weight+=w;
  }}
- c+=b/max(.01,weight)*.12;
+ c+=b/max(.01,weight)*.06;
  c=aces(c*P.exposure.x);
  let v=1.-.24*pow(length((uv-.5)*vec2f(1.00,1.13)),1.7);
  c*=v;
@@ -400,14 +508,37 @@ async function main(){
  const meshArr=new Float32Array(mesh),cubeArr=new Float32Array(cube);
  const bMesh=buffer(meshArr,BU.VERTEX),bCube=buffer(cubeArr,BU.VERTEX),bBox=buffer(new Float32Array(boxes),BU.VERTEX),bPavers=buffer(new Float32Array(pavers),BU.VERTEX),bLeaves=buffer(new Float32Array(leaves),BU.VERTEX);
  status.textContent='Compilazione shader e illuminazione WebGPU…';bar.style.width='72%';
- const module=dev.createShaderModule({code:shader}),postMod=dev.createShaderModule({code:postShader});
- for(const [name,mod] of [['scene',module],['post',postMod]]){
+ const detailDim=touch?512:1024;
+ const detailMips=Math.floor(Math.log2(detailDim))+1;
+ const detailSource=detailShader.replaceAll('1024.',String(detailDim)+'.');
+ const module=dev.createShaderModule({code:shader}),postMod=dev.createShaderModule({code:postShader}),
+       detailModule=dev.createShaderModule({code:detailSource}),mipModule=dev.createShaderModule({code:mipShader});
+ for(const [name,mod] of [['scene',module],['post',postMod],['stone detail',detailModule],['stone mipmaps',mipModule]]){
    const info=await mod.getCompilationInfo();let errors=info.messages.filter(x=>x.type==='error');if(errors.length)throw Error(name+' WGSL: '+errors.map(x=>x.message+' line '+x.lineNum).join('; ').slice(0,300));
  }
+ // Texture bake follows Abyssal Garden: generate slopes, height and mottling once on GPU.
+ status.textContent='Generazione materiali della Lunigiana…';bar.style.width='77%';
+ const detailTexture=dev.createTexture({size:[detailDim,detailDim],format:'rgba8unorm',mipLevelCount:detailMips,usage:TU.RENDER_ATTACHMENT|TU.TEXTURE_BINDING});
+ const detailSampler=dev.createSampler({addressModeU:'repeat',addressModeV:'repeat',magFilter:'linear',minFilter:'linear',mipmapFilter:'linear'});
+ const bakePipe=dev.createRenderPipeline({layout:'auto',vertex:{module:detailModule,entryPoint:'vs'},fragment:{module:detailModule,entryPoint:'fs',targets:[{format:'rgba8unorm'}]}});
+ const mipPipe=dev.createRenderPipeline({layout:'auto',vertex:{module:mipModule,entryPoint:'vs'},fragment:{module:mipModule,entryPoint:'fs',targets:[{format:'rgba8unorm'}]}});
+ const encoderDetail=dev.createCommandEncoder();
+ let passDetail=encoderDetail.beginRenderPass({colorAttachments:[{view:detailTexture.createView({baseMipLevel:0,mipLevelCount:1}),loadOp:'clear',storeOp:'store',clearValue:[0,0,0,1]}]});
+ passDetail.setPipeline(bakePipe);passDetail.draw(3);passDetail.end();
+ for(let level=1;level<detailMips;level++){
+  const prevView=detailTexture.createView({baseMipLevel:level-1,mipLevelCount:1});
+  const nextView=detailTexture.createView({baseMipLevel:level,mipLevelCount:1});
+  const bg=dev.createBindGroup({layout:mipPipe.getBindGroupLayout(0),entries:[{binding:0,resource:prevView},{binding:1,resource:detailSampler}]});
+  const pass=encoderDetail.beginRenderPass({colorAttachments:[{view:nextView,loadOp:'clear',storeOp:'store',clearValue:[0,0,0,1]}]});
+  pass.setPipeline(mipPipe);pass.setBindGroup(0,bg);pass.draw(3);pass.end();
+ }
+ q.submit([encoderDetail.finish()]);
  const stageLayout=dev.createBindGroupLayout({entries:[
   {binding:0,visibility:GPUShaderStage.VERTEX|GPUShaderStage.FRAGMENT,buffer:{}},
   {binding:1,visibility:GPUShaderStage.FRAGMENT,texture:{sampleType:'depth'}},
-  {binding:2,visibility:GPUShaderStage.FRAGMENT,sampler:{type:'comparison'}}
+  {binding:2,visibility:GPUShaderStage.FRAGMENT,sampler:{type:'comparison'}},
+  {binding:3,visibility:GPUShaderStage.FRAGMENT,texture:{}},
+  {binding:4,visibility:GPUShaderStage.FRAGMENT,sampler:{}}
  ]}),stagePL=dev.createPipelineLayout({bindGroupLayouts:[stageLayout]});
  const bCamera=dev.createBuffer({size:192,usage:BU.UNIFORM|BU.COPY_DST});
  const shadowLayout=dev.createBindGroupLayout({entries:[{binding:0,visibility:GPUShaderStage.VERTEX,buffer:{}}]});
@@ -417,7 +548,7 @@ async function main(){
  const texShadow=dev.createTexture({size:[shadowSize,shadowSize],format:'depth32float',usage:TU.RENDER_ATTACHMENT|TU.TEXTURE_BINDING});
  const shadowView=texShadow.createView();
  const compare=dev.createSampler({compare:'less-equal',magFilter:'linear',minFilter:'linear'});
- const stageBG=dev.createBindGroup({layout:stageLayout,entries:[{binding:0,resource:{buffer:bCamera}},{binding:1,resource:shadowView},{binding:2,resource:compare}]});
+ const stageBG=dev.createBindGroup({layout:stageLayout,entries:[{binding:0,resource:{buffer:bCamera}},{binding:1,resource:shadowView},{binding:2,resource:compare},{binding:3,resource:detailTexture.createView()},{binding:4,resource:detailSampler}]});
  const vbCube={arrayStride:32,attributes:[{shaderLocation:0,offset:0,format:'float32x3'},{shaderLocation:1,offset:12,format:'float32x3'},{shaderLocation:2,offset:24,format:'float32x2'}]};
  const vbInstance={arrayStride:48,stepMode:'instance',attributes:[{shaderLocation:3,offset:0,format:'float32x4'},{shaderLocation:4,offset:16,format:'float32x4'},{shaderLocation:5,offset:32,format:'float32x4'}]};
  const vbMesh={arrayStride:48,attributes:[{shaderLocation:0,offset:0,format:'float32x3'},{shaderLocation:1,offset:12,format:'float32x3'},{shaderLocation:2,offset:24,format:'float32x2'},{shaderLocation:3,offset:32,format:'float32x4'}]};
@@ -441,13 +572,13 @@ async function main(){
    colorTarget=dev.createTexture({size:[w,h],format:'rgba16float',usage:TU.RENDER_ATTACHMENT|TU.TEXTURE_BINDING});
    depthTarget=dev.createTexture({size:[w,h],format:'depth24plus',usage:TU.RENDER_ATTACHMENT});
    postBG=dev.createBindGroup({layout:postLayout,entries:[{binding:0,resource:colorTarget.createView()},{binding:1,resource:smp},{binding:2,resource:{buffer:bPost}}]});
-   q.writeBuffer(bPost,0,new Float32Array([w,h,1/w,1/h,1.06,0,0,0]));pixels=w*h;
+   q.writeBuffer(bPost,0,new Float32Array([w,h,1/w,1/h,0.83,0,0,0]));pixels=w*h;
  }
  const camera={x:bends(24),y:targetRoad(24)+1.72,z:24,yaw:0,pitch:.015};
  const light=[-.58,.79,-.42];const sunPos=[-38,66,-55],look=[0,2,-13];
  const lightVP=matrixMul(ortho(-76,76,-74,74,1,190),lookAt(sunPos,look,[0,1,0]));
  const udata=new Float32Array(48);
- udata.set(lightVP,16);udata.set([light[0],light[1],light[2],1.22],36);
+ udata.set(lightVP,16);udata.set([light[0],light[1],light[2],1.0],36);
  const keys=new Set();let running=false,opened=true,dx=0,dy=0,yawInput=0,joy=[0,0],last=performance.now(),frameCount=0,tsCount=0,fps=0;
  function makeMenu(on){opened=on;running=!on;$('overlay').classList.toggle('hide',!on);$('hud').style.display=on?'none':'block';$('top').querySelectorAll('button').forEach(b=>b.style.display=on?'none':'block');$('reticle').style.display=on?'none':'block';$('touch').style.display=!on&&touch?'block':'none';if(on&&document.pointerLockElement)document.exitPointerLock();}
  function capture(){if(!touch)canvas.requestPointerLock?.().catch(()=>{});}
