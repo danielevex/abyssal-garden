@@ -1409,6 +1409,37 @@ function makeWorld(D, T, flyPts, POSES) {
       solid(rnd()*4|0,xx,yy+.12,zz,rr(.10,.33),qRand(),1,rnd(),1,0);
     }
   }
+  // Stone-paved medieval lane and dry-stone boundaries follow real terrain.
+  // Small pebble geometry uses Abyssal's cullable, low-LOD chunk slot.
+  rseed(2050);
+  const laneRock=(x,y,z,sc,tilt=0)=>{
+    const q=qAxis(0,1,0,rr(-PI,PI));
+    chunks[6][cellOf(x,z)].push(x,y,z,sc,q[0],q[1],q[2],q[3],1,rnd(),44,0);
+  };
+  for(let z=29;z>-108;z-=.55){
+    const bend=sin(z*.041)*.68+sin(z*.097)*.26;
+    for(let k=0;k<11;k++){
+      if(rnd()<.20)continue;
+      const x=bend+(k-5)*.51+rr(-.12,.12),y=gy(x,z);
+      if(abs(y-gy(bend,z))>1.1)continue;
+      laneRock(x,y-.07+rr(-.022,.022),z+rr(-.17,.17),rr(.20,.33));
+    }
+  }
+  // Broken low stone walls: a winding succession of irregular mineral fragments.
+  for(let z=29;z>-97;z-=.64){
+    if((z>-23&&z<-15)||(z>-54&&z<-47)||(z>10&&z<19))continue;
+    for(const side of [-1,1]){
+      const bend=sin(z*.041)*.68+sin(z*.097)*.26, x=bend+side*3.82;
+      const base=gy(x,z);
+      if(abs(base-gy(bend,z))>1.9)continue;
+      for(let level=0;level<3;level++){
+        for(let stone=0;stone<2;stone++){
+          const xx=x+rr(-.12,.12),zz=z+stone*.30+rr(-.08,.08);
+          laneRock(xx,base+.16+level*.24,zz,rr(.19,.27));
+        }
+      }
+    }
+  }
   // No ship, whale fluke or bubble vents.
   // --- pack leaves (36 bytes: 8 floats + 4 unorm8), sorted by culling cell
   const pack = (L, step = 1, wm = 1) => {
