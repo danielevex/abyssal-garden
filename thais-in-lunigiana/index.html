@@ -286,18 +286,18 @@ fn sunShadow(i:Out)->f32{
 }
 fn finish(col:vec3f,wp:vec3f,n:vec3f,mat:f32,shadow:f32)->vec3f{
  let d=length(U.camera.xyz-wp);
- let L=normalize(U.sunlight.xyz),V=normalize(U.camera.xyz-wp),N=normalize(n);
+ let L=normalize(U.sunlight.xyz);let V=normalize(U.camera.xyz-wp);let N=normalize(n);
  let nd=max(dot(N,L),0.);
  let occl=select(select(1.,.76,mat==8.),.91,mat==5.);
  let ambient=vec3f(.31,.39,.45)*.72 + vec3f(.70,.50,.32)*.17;
  var c=col*(ambient*occl + vec3f(1.25,1.08,.78)*nd*shadow*U.sunlight.w);
  let rough=select(select(.95,.6,mat==7.),.18,mat==8.);
- let hv=normalize(L+V),spec=pow(max(dot(N,hv),0.), mix(56.,7.,rough))*(1.-rough*.64)*shadow;
+ let hv=normalize(L+V);let spec=pow(max(dot(N,hv),0.), mix(56.,7.,rough))*(1.-rough*.64)*shadow;
  c+=vec3f(1.2,1.03,.76)*spec*.48;
  if(mat==8.){c+=vec3f(.06,.10,.11);}
  if(mat==12.){c+=col*.10;}
  let f=1.-exp(-pow(d*.0118,1.35));
- let atmos=mix(vec3f(.52,.62,.61),vec3f(.77,.73,.57),smooth(clamp((wp.y+6.)/28.,0.,1.)));
+ let atmos=mix(vec3f(.52,.62,.61),vec3f(.77,.73,.57),smoothstep(0.,1.,clamp((wp.y+6.)/28.,0.,1.)));
  return mix(c,atmos,f*.86);
 }
 @fragment fn fsMain(i:Out)->@location(0) vec4f {
@@ -342,7 +342,7 @@ fn finish(col:vec3f,wp:vec3f,n:vec3f,mat:f32,shadow:f32)->vec3f{
 }
 @fragment fn fsSky(@builtin(position) q:vec4f)->@location(0) vec4f{
  let uv=q.xy/U.resolution.xy;let a=clamp(uv.y,0.,1.);
- let color=mix(vec3f(.90,.75,.52),vec3f(.35,.56,.69),smoothstep(.38,1.0,1.-a));
+ var color=mix(vec3f(.90,.75,.52),vec3f(.35,.56,.69),smoothstep(.38,1.0,1.-a));
  let streaks=fbm(vec3f(uv.x*3.5,a*4.,U.camera.w*.004));
  let horizon=smoothstep(.55,.82,a);
  color=mix(color,vec3f(.94,.80,.63),horizon*.3);
@@ -364,7 +364,7 @@ struct Post{res:vec4f,exposure:vec4f};
 fn aces(x:vec3f)->vec3f{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),vec3f(0.),vec3f(1.));}
 @fragment fn fs(@builtin(position) fc:vec4f)->@location(0) vec4f {
  let uv=fc.xy*P.res.zw;
- let c=textureSample(img,smp,uv).rgb;
+ var c=textureSample(img,smp,uv).rgb;
  // small scale bloom from high-luminance features; preserve fine masonry texture.
  var b=vec3f(0.);var weight=0.;
  for(var i=-2;i<=2;i+=2){for(var j=-2;j<=2;j+=2){
