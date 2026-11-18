@@ -98,8 +98,26 @@ function chippedStone(x,y,z,w,h,facing,tint){
 
 function stoneWallFace(x,y,z,w,h,side,plastered=false,openings=[]){
  const ix=side===-1?x+.065:x-.065;
- if(plastered){put(x,y+h*.5,z,.23,h,w,M.PLASTER,shade([.80,.76,.67],.055));
-   for(let v=0;v<14;v++){if(rnd()<.35){let a=rr(-w*.42,w*.42),q=rr(.8,h-.8);put(x+side*.135,y+q,z+a,.018,rr(.12,.4),rr(.2,.7),M.STONE,shade([.77,.74,.68],.12));}}return;
+ if(plastered){
+   // Cut real voids in plaster at each window/door opening; no full white wall
+   // hiding the recessed windows. Panel seams overlap to remain invisible.
+   const unique=a=>[...new Set(a.map(v=>Math.round(v*1000)/1000))].sort((a,b)=>a-b);
+   const yCuts=unique([0,h,...openings.flatMap(o=>[clamp(o.y-y-o.h*.5,0,h),clamp(o.y-y+o.h*.5,0,h)])]);
+   const zCuts=unique([-w*.5,w*.5,...openings.flatMap(o=>[clamp(o.z-z-o.w*.5,-w*.5,w*.5),clamp(o.z-z+o.w*.5,-w*.5,w*.5)])]);
+   for(let yi=0;yi<yCuts.length-1;yi++)for(let zi=0;zi<zCuts.length-1;zi++){
+     const ya=yCuts[yi],yb=yCuts[yi+1],za=zCuts[zi],zb=zCuts[zi+1];
+     if(yb-ya<.025||zb-za<.025)continue;
+     const yy=y+(ya+yb)*.5,zz=z+(za+zb)*.5;
+     if(openings.some(o=>Math.abs(yy-o.y)<o.h*.5-.004&&Math.abs(zz-o.z)<o.w*.5-.004))continue;
+     put(x+side*.06,yy,zz,.21,(yb-ya)+.008,(zb-za)+.008,M.PLASTER,shade([.77,.72,.63],.018));
+   }
+   // Patches where old lime plaster reveals sandstone near street level.
+   for(let v=0;v<17;v++)if(rnd()<.35){
+     const zz=z+rr(-w*.43,w*.43),yy=y+rr(.65,h-.75);
+     if(openings.some(o=>Math.abs(yy-o.y)<o.h*.5+.15&&Math.abs(zz-o.z)<o.w*.5+.16))continue;
+     put(x+side*.173,yy,zz,.024,rr(.10,.39),rr(.18,.52),M.STONE,shade([.65,.63,.58],.07));
+   }
+   return;
  }
  for(let cy=0;cy<h;){let H=rr(.29,.56),pos=-w*.5;while(pos<w*.5){let W=Math.min(w*.5-pos,rr(.45,1.12));if(W<.13)break;let yy=y+cy+H*.49,zz=z+pos+W*.5;const rim=rnd();let tint=shade(rim<.10?[.60,.61,.58]:rim<.31?[.74,.70,.62]:[.78,.75,.67],.065);
  const hole=openings.some(g=>Math.abs(yy-g.y)<(H*.91+g.h)*.51+.03&&Math.abs(zz-g.z)<(W*.98+g.w)*.51+.025);
