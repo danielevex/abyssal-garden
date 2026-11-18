@@ -1409,7 +1409,9 @@ function makeWorld(D, T, flyPts, POSES) {
       solid(rnd()*4|0,xx,yy+.12,zz,rr(.10,.33),qRand(),1,rnd(),1,0);
     }
   }
-  // Stone-paved medieval lane and dry-stone boundaries follow real terrain.
+  // Monumental stone gate near the start, with individual radial voussoirs.
+  solid(12,0,gy(0,-5.6)-.10,-5.6,1,qAxis(0,1,0,.06),2,.31,1,0);
+    // Stone-paved medieval lane and dry-stone boundaries follow real terrain.
   // Small pebble geometry uses Abyssal's cullable, low-LOD chunk slot.
   rseed(2050);
   const laneRock=(x,y,z,sc,tilt=0)=>{
@@ -1487,7 +1489,7 @@ function makeWorld(D, T, flyPts, POSES) {
   for (let i = 0; i < snow.length; i++) snow[i] = rnd();
 
   const sol = { data: [], ranges: [] }; let si = 0;
-  for (let m = 0; m < 12; m++) { const a = solids[m] || []; sol.ranges.push([si, a.length / 12]); si += a.length / 12; for (let i = 0; i < a.length; i++) sol.data.push(a[i]); }
+  for (let m = 0; m < 13; m++) { const a = solids[m] || []; sol.ranges.push([si, a.length / 12]); si += a.length / 12; for (let i = 0; i < a.length; i++) sol.data.push(a[i]); }
   const packC = (L) => {
     let n = 0; const start = new Uint32Array(nCells + 1);
     for (let c = 0; c < nCells; c++) { start[c] = n; n += L[c].length / 12; }
@@ -1997,12 +1999,49 @@ function meshVillageHouse(){
  return m;
 }
 
+function meshMedievalGate(){
+ const m=new Mesh();
+ const block=(x,y,z,w,h,d,a=.99)=>{
+  const pts=[[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]];
+  const p=pts.map(([u,v,t])=>[x+u*w*.5,y+v*h*.5,z+t*d*.5]);
+  for(const f of [[0,3,2,1],[4,5,6,7],[0,4,7,3],[1,2,6,5],[3,7,6,2],[0,1,5,4]]){
+   const a0=f.map(i=>m.v(...p[i],a));m.quad(...a0);
+  }
+ };
+ for(const side of [-1,1]){
+  block(side*1.98,1.53,0,.88,3.06,1.60);
+  block(side*2.48,.63,-.05,.51,1.25,1.94,.89);
+  for(let row=0;row<6;row++)block(side*1.98,row*.49+.23,.82,.94,.41,.17,.94);
+  block(side*1.98,3.12,0,1.12,.27,1.81,.97);
+ }
+ const radial=(a,r,z)=>[Math.cos(a)*r,3.13+Math.sin(a)*r,z];
+ const segments=16,r1=1.55,r2=2.38;
+ for(let i=0;i<segments;i++){
+   const a0=(i+.035)*Math.PI/segments,a1=(i+.965)*Math.PI/segments;
+   const q=[radial(a0,r1,-.82),radial(a1,r1,-.82),
+     radial(a1,r2,-.82),radial(a0,r2,-.82),
+     radial(a0,r1,.82),radial(a1,r1,.82),
+     radial(a1,r2,.82),radial(a0,r2,.82)];
+   const shade=i===7||i===8?.92:.84+(i%4)*.045;
+   for(const f of [[0,3,2,1],[4,5,6,7],[0,1,5,4],[3,7,6,2],[1,2,6,5],[0,4,7,3]]){
+     const a=f.map(j=>m.v(...q[j],shade));m.quad(...a);
+   }
+ }
+ block(0,5.46,0,5.12,.38,1.83,.93);
+ // Left parapet is deliberately damaged, giving the entrance a lived-in silhouette.
+ for(let k=0;k<7;k++){
+   if(k===2||k===5)continue;
+   block(-2.12+k*.67,5.94,.05,.54,.59,.72,.94);
+ }
+ return m;
+}
+
 const meshes = [meshChunk(1, 3), meshChunk(7, 3), meshChunk(13, 3), meshChunk(22, 3),
   meshLathe([[0, 0, 0.5], [0.34, 0, 0.6], [0.5, 0.2, 0.85], [0.6, 0.6, 1], [0.55, 0.95, 1], [0.47, 1.08, 1], [0.38, 1.1, 0.9], [0.3, 1.0, 0.45], [0.26, 0.6, 0.15], [0, 0.35, 0.05]], 18, 0.3, 9),
   meshLathe([[0, 0, 0.5], [0.2, 0, 0.6], [0.26, 0.5, 0.85], [0.4, 1.25, 1], [0.4, 1.42, 1], [0.33, 1.48, 0.9], [0.26, 1.38, 0.4], [0.18, 0.8, 0.12], [0, 0.5, 0.05]], 16, 0.35, 8),
   meshLathe([[0, 0, 0.5], [0.5, 0, 0.7], [0.72, 0.18, 1], [0.74, 0.38, 1], [0.62, 0.5, 0.9], [0.48, 0.42, 0.45], [0.4, 0.2, 0.15], [0, 0.14, 0.06]], 18, 0.25, 10),
   meshCoral(0), meshCoral(1), meshTubes()].map((m) => m.build());
-meshes.push(meshChestnutTrunk().build(), meshVillageHouse().build(), meshManta().build(), meshFish().build(),
+meshes.push(meshChestnutTrunk().build(), meshVillageHouse().build(), meshMedievalGate().build(), meshFish().build(),
   meshChunk(3).build(), meshChunk(11).build(), meshChunk(29).build(), meshChunk(5, 3).build(), meshChunk(17, 3).build(), meshChunk(41, 3).build(), meshChunk(9, 1).build(), meshCoral(0, 1).build(), meshCoral(1, 1).build(), meshChunk(5, 2, 1).build(), meshChunk(17, 2, 1).build(), meshChunk(41, 2, 1).build());
 let nV = 0, nI = 0;
 for (const m of meshes) { m.v0 = nV; m.i0 = nI; nV += m.nv; nI += m.ib.length; }
@@ -2038,7 +2077,7 @@ Q.writeTexture({ texture: tMap }, Wd.gm, { bytesPerRow: 2048 }, [512, 512]);
   r.setVertexBuffer(0, vbTerrain); r.setVertexBuffer(1, ibSolids); r.setIndexBuffer(ibTerrain, 'uint32');
   r.drawIndexed(T.ib.length, 1, 0, 0, nSolid);
   r.setPipeline(pSolidSh); r.setVertexBuffer(0, vbMesh); r.setIndexBuffer(ibMesh, 'uint32');
-  for (let i = 0; i < 12; i++) { const g = Wd.solids.ranges[i]; if (g[1]) r.drawIndexed(meshes[i].ib.length, g[1], meshes[i].i0, meshes[i].v0, g[0]); }
+  for (let i = 0; i < 13; i++) { const g = Wd.solids.ranges[i]; if (g[1]) r.drawIndexed(meshes[i].ib.length, g[1], meshes[i].i0, meshes[i].v0, g[0]); }
   // small rocks, sponges and corals (~35M triangles) only on High: too much for a phone's driver
   if (!LV) for (let i = 0; i < NCHUNK; i++) { r.setVertexBuffer(1, ibChunk[i]); r.drawIndexed(meshes[14 + i].ib.length, Wd.chunks[i].n, meshes[14 + i].i0, meshes[14 + i].v0, 0); }
   if (!LV) for (let i = 0; i < 6; i++) if (Wd.props[i].n) { r.setVertexBuffer(1, ibProp[i]); r.drawIndexed(meshes[4 + i].ib.length, Wd.props[i].n, meshes[4 + i].i0, meshes[4 + i].v0, 0); }
@@ -2181,7 +2220,7 @@ function render() {
   r.setPipeline(pTerrain); r.setVertexBuffer(0, vbTerrain); r.setVertexBuffer(1, ibSolids); r.setIndexBuffer(ibTerrain, 'uint32');
   drawCells(r, T.start, T.lo, T.hi, 1.5, 1, 0, 0, 240);
   r.setPipeline(pSolid); r.setVertexBuffer(0, vbMesh); r.setIndexBuffer(ibMesh, 'uint32');
-  for (let i = 0; i < 12; i++) { const g = Wd.solids.ranges[i]; if (g[1]) r.drawIndexed(meshes[i].ib.length, g[1], meshes[i].i0, meshes[i].v0, g[0]); }
+  for (let i = 0; i < 13; i++) { const g = Wd.solids.ranges[i]; if (g[1]) r.drawIndexed(meshes[i].ib.length, g[1], meshes[i].i0, meshes[i].v0, g[0]); }
   for (let i = 0; i < NCHUNK; i++) {
     const c = Wd.chunks[i], big = i > 2 && i < 6; r.setVertexBuffer(1, ibChunk[i]);
     drawCells(r, c.start, c.lo, c.hi, 3, meshes[14 + i], 0, 0, i > 5 ? 30 : big ? 40 : 96);
