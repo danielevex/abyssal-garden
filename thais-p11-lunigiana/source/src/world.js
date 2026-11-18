@@ -2,36 +2,25 @@
 // world layout + procedural content generation (load-time only)
 // ============================================================================
 
-// designed rock masses: ax, az, bx, bz, radius, top, overhang, waist
+// P11 — terrestrial valley and rocky Lunigiana slopes (GPU volumetric density).
+// Massifs: x/z segment endpoints, width, summit height, erosion, roughness.
 const MESAS = [
-  [-37, -42, -33, -22, 9, -7, 3.5, 2], [-29, -15, -33, 5, 12, -14, 3, 2], [-36, 11, -30, 27, 9, -5, 4, 2],   // west wall of the main canyon
-  [30, -45, 35, -27, 9, -9, 4, 2], [37, -20, 31, -3, 11, -16, 3, 2], [32, 5, 35, 9, 7, -8, 4, 2],          // east wall
-  [19, -15, 19, -15, 4.4, -6, 2, 1.5],   // pillar with window
-  [6, -88, 6, -88, 10, -34, 0, 0],       // mound in the kelp basin
-  [0, -106, 0, -106, 8, 3, 2, 2],        // pillar reaching the surface
-  [44, 6, 47, -8, 7, -17, 3, 1],         // ship supports
-  [33, 29, 37, 12, 9, -19, -6.5, 0],     // sloped sunlit wall beside the wreck
-  [74, 14, 74, 14, 8, -15, 3, 1],
-  [-84, -34, -80, -12, 10, -7, 6, 2], [-78, -6, -83, 12, 12, -13, 5, 2], [-82, 18, -79, 32, 9, -8, 6, 2],   // sponge canyon west wall
-  [-17, 62, -19, 78, 10, -6, 9, 3], [-21, 84, -18, 100, 11, -9, 8, 3],     // grotto overhang cliff
-  [22, 67, 24, 80, 7, -11, 6, 2],        // grotto coral rock
-  [-16, 122, 34, 122, 9, -27, 3, 2],     // grotto far wall
+ [-42,-142,-42,-90,13,-17,1.0,1],[-37,-82,-40,-33,12,-20,1,1],
+ [-40,-25,-38,19,11,-17,1,1],[-45,28,-39,76,15,-14,1,1],
+ [-46,85,-42,131,15,-11,1,1],
+ [42,-141,40,-91,13,-15,1,1],[38,-83,42,-32,12,-18,1,1],
+ [41,-23,38,23,11,-18,1,1],[40,34,43,82,13,-15,1,1],
+ [44,92,46,140,14,-13,1,1],
+ [-87,-115,-96,-22,22,-6,1,1],[-92,8,-93,130,22,-7,1,1],
+ [89,-117,95,-14,20,-5,1,1],[92,7,95,132,22,-6,1,1],
+ [-27,-63,-23,-52,6,-24,1,1],[28,46,32,56,7,-23,1,1]
 ];
-// vertical ring arches: cx, cy, cz, yaw, major radius, minor radius, y squash
-const ARCHES = [
-  [-23, -9.5, -16, 0.3, 4.2, 1.4, 1.2],
-  [0, -45, -34, 1.57, 14, 2.7, 1.2],
-  [-40, -45, 44, 1.57, 10, 2.2, 1.3],
-];
-// carved tunnels: ax, ay, az, radius, bx, by, bz
-const HOLES = [
-  [19, -21, -23, 2.5, 19, -21, -7],
-  [9, -37, 108, 4.2, 9, -34, 136],
-];
-// regions kept free of random mesas: ax, az, bx, bz, radius, softness
+const ARCHES = []; // natural underwater ring arches removed; medieval stone gate is a mesh
+const HOLES = []; // no marine tunnels
 const CLEARS = [
-  [0, -45, 0, 35, 22, 10], [0, -86, 0, -86, 46, 12], [42, 24, 74, 6, 22, 10], [72, -26, 72, -26, 26, 10],
-  [-60, -36, -60, 36, 13, 8], [-60, 42, -18, 46, 12, 8], [4, 58, 8, 100, 24, 10], [-34, -74, -56, -46, 11, 8],
+ [0,29,0,-108,7,4], [0,-8,0,-8,21,9],
+ [0,-36,0,-36,18,6], [0,20,0,20,15,6],
+ [0,-68,0,-68,18,7], [0,65,0,65,14,7]
 ];
 const PURPLE = [6, 84];
 const zoneP = (x, z) => sstep(44, 26, hypot(x - PURPLE[0], z - PURPLE[1]));
