@@ -923,10 +923,13 @@ async function main(){
   frameCount++;if(ctime-tsCount>1100){fps=Math.round(frameCount*1000/(ctime-tsCount||1));frameCount=0;tsCount=ctime;$('stats').textContent=`WebGPU · ${fps} fps · ${((boxes.length/12)|0)+gpuLeafCount} dettagli · ${(pixels/1e6).toFixed(1)} Mpx`;}
   requestAnimationFrame(draw);
  }
- status.textContent='P08 · Abyssal Architecture · WebGPU nativo';bar.style.width='100%';setTimeout(()=>bar.style.opacity='0',600);
+ status.textContent='P08 · Primo fotogramma WebGPU in preparazione…';bar.style.width='95%';
  $('quality').textContent=low?'Qualità: Mobile':'Qualità: Alta';
+ // Submit the actual first frame, then wait for the GPU: shader/pipeline work is real.
+ draw(performance.now());
  await q.onSubmittedWorkDone();
- requestAnimationFrame(draw);
+ status.textContent='P08 · Abyssal Architecture pronta · '+gpuLeafCount.toLocaleString('it-IT')+' istanze GPU';
+ bar.style.width='100%';setTimeout(()=>bar.style.opacity='0',600);
 }
 main().catch(err=>{console.error(err);status.textContent='Errore WebGPU';const box=$('failure');box.style.display='block';box.textContent='Il borgo WebGPU non si è avviato: '+(err?.message||err);});
 
