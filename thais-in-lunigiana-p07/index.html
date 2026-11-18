@@ -662,6 +662,7 @@ struct Post{res:vec4f,exposure:vec4f};
  let xy=vec2f(f32(i32(idx&1u)*4-1),f32(i32(idx>>1u)*4-1));return vec4f(xy,0,1);
 }
 fn aces(x:vec3f)->vec3f{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),vec3f(0.),vec3f(1.));}
+const POST_RADIUS:i32=__POST_RADIUS__;
 fn lum(x:vec3f)->f32{return dot(x,vec3f(.2126,.7152,.0722));}
 @fragment fn fs(@builtin(position) fc:vec4f)->@location(0) vec4f{
  let uv=fc.xy*P.res.zw;
@@ -669,6 +670,8 @@ fn lum(x:vec3f)->f32{return dot(x,vec3f(.2126,.7152,.0722));}
  var bloom=vec3f(0.);var wt=0.;
  for(var i=-2;i<=2;i++){
   for(var j=-2;j<=2;j++){
+   // Mobile samples a 3x3 kernel, desktop a wider 21-tap pattern.
+   if(abs(i)>POST_RADIUS||abs(j)>POST_RADIUS){continue;}
    if(abs(i)==2&&abs(j)==2){continue;}
    let p=vec2f(f32(i),f32(j));
    let q=textureSample(img,smp,clamp(uv+p*P.res.zw*3.,vec2f(0.),vec2f(1.))).rgb;
@@ -727,7 +730,7 @@ async function main(){
  const detailDim=touch?512:1024;
  const detailMips=Math.floor(Math.log2(detailDim))+1;
  const detailSource=detailShader.replaceAll('1024.',String(detailDim)+'.');
- const module=dev.createShaderModule({code:shader.replace('__SHADOW_RADIUS__',touch?'1':'2')}),postMod=dev.createShaderModule({code:postShader}),
+ const module=dev.createShaderModule({code:shader.replace('__SHADOW_RADIUS__',touch?'1':'2')}),postMod=dev.createShaderModule({code:postShader.replace('__POST_RADIUS__',touch?'1':'2')}),
        detailModule=dev.createShaderModule({code:detailSource}),mipModule=dev.createShaderModule({code:mipShader});
  for(const [name,mod] of [['scene',module],['post',postMod],['stone detail',detailModule],['stone mipmaps',mipModule]]){
    const info=await mod.getCompilationInfo();let errors=info.messages.filter(x=>x.type==='error');if(errors.length)throw Error(name+' WGSL: '+errors.map(x=>x.message+' line '+x.lineNum).join('; ').slice(0,300));
