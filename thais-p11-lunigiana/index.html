@@ -1323,43 +1323,37 @@ function makeWorld(D, T, flyPts, POSES) {
       for (let j = 0; j < n; j++) leaf(big, x, y, z, rr(0.5, 1.4), yaw + rr(-0.9, 0.9), rr(0.3, 1.1), rr(0.06, 0.12), 0.5, zp > 0.4 && rnd() < 0.6 ? 3 : 0, rnd(), rnd(), rr(0.2, 0.6));
     }
   }
-  // P10 terrestrial prototype: castagneto layer placed onto the real
-  // GPU-density terrain, with leaf geometry handled by Abyssal's original LOD.
-  rseed(190);
-  const groveSites = [[-13,-35],[-24,-13],[18,-36],[27,5],[-14,22],
-    [-31,43],[35,38],[-7,53],[20,64],[-34,-75],[25,-80],[-47,-44]];
-  for (const [gx,gz] of groveSites) {
-    for (let treeIndex=0;treeIndex<3;treeIndex++){
-      const x=gx+rr(-5.2,5.2),z=gz+rr(-5.2,5.2);
-      if(nearPose(x,z,5.5))continue;
-      const floors=floorsAt(x,z);
-      if(!floors.length)continue;
-      const y=floors[floors.length-2];
-      if(grad(x,y,z)[1]<.62)continue;
-      const tall=rr(6.5,11.6),spread=rr(2.5,4.4);
-      // Trunk segments and branching, using the existing low-overhead
-      // procedural stem profile rather than instancing box primitives.
-      for(let j=0;j<18;j++){
-        const t=j/18;
-        leaf(big,x+sin(t*3.+x)*.13,y+t*tall*.82,z+cos(t*3.+z)*.13,
-          .63,0,.11,.18,t*tall,1,rnd(),rnd(),.25);
-      }
-      for(let j=0;j<9;j++){
-        const angle=TAU*j/9+rr(-.3,.3);
-        leaf(big,x+cos(angle)*.65,y+tall*.62+rr(0,1.0),z+sin(angle)*.65,
-          rr(2.6,3.9),angle,.68,.12,tall*.6,1,rnd(),rnd(),.35);
-      }
-      const amount=LV===0?700:LV===1?400:230;
-      for(let j=0;j<amount;j++){
-        const angle=rr(0,TAU),rad=pow(rnd(),.64)*spread;
-        const cx=x+cos(angle)*rad,cz=z+sin(angle)*rad;
-        const v=sqrt(max(0.,1.-rad*rad/(spread*spread)));
-        const cy=y+tall*.70+rr(-1.,1.)+v*rr(0.,tall*.30);
-        leaf(big,cx,cy,cz,rr(.38,.86),angle+rr(-1,1),
-          rr(.25,1.4),rr(.13,.30),cy-y,0,rnd(),rnd(),rr(.25,.70));
+  // P11 Castagneto: tree trunks with 3D branch geometry and individually-instanced leaves.
+  const gy=(x,z)=>{const f=floorsAt(x,z);return f.length?f[f.length-2]:-45;};
+  const chestnut=(x,z,scale=1)=>{
+    const f=floorsAt(x,z);if(!f.length)return;
+    const y=f[f.length-2];if(y>-9||grad(x,y,z)[1]<.63)return;
+    const H=rr(8.2,13.8)*scale,R=rr(3.1,5.4)*scale;
+    solid(10,x,y-.10,z,H/10,qAxis(0,1,0,rr(0,TAU)),3,rnd(),1,0);
+    for(let branch=0;branch<10;branch++){
+      const angle=TAU*branch/10+rr(-.30,.30),cx=x+cos(angle)*R*.54,cz=z+sin(angle)*R*.54;
+      const cy=y+H*rr(.64,.86);
+      const n=LV===0?260:LV===1?150:70;
+      for(let k=0;k<n;k++){
+        const a=rr(0,TAU),radius=pow(rnd(),.59)*R*.55;
+        const xx=cx+cos(a)*radius,zz=cz+sin(a)*radius;
+        const height=cy+rr(-1.15,1.32)+(1.-radius/(R*.56))*rr(.24,1.26);
+        leaf(big,xx,height,zz,rr(.31,.76)*scale,rr(0,TAU),
+          rr(.40,1.40),rr(.12,.28)*scale,height-y,0,rnd(),rnd(),rr(.28,.63));
       }
     }
+  };
+  rseed(2030);
+  // No trees on the central track: frame the view with irregular wooded slopes.
+  for(let j=0;j<(LV===0?135:LV===1?88:44);j++){
+    const side=rnd()<.5?-1:1;
+    const x=side*rr(12,84),z=rr(-137,121);
+    if(nearPose(x,z,4.0))continue;
+    chestnut(x,z,rr(.70,1.14));
   }
+  for(const p of [[-16,-10],[19,-23],[-24,-36],[27,-45],[-19,15],[25,26],[-26,55],[30,66],[-33,-72],[29,-79],[-18,83],[20,102]])
+    chestnut(p[0],p[1],rr(.87,1.13));
+  
   // --- ground cover: dense carpets of small tufts in the magenta patches
   rseed(4);
   for (const p of MAGENTA) for (let i = p[2] * p[2] * PI * 45; i > 0; i--) {
@@ -1405,6 +1399,20 @@ function makeWorld(D, T, flyPts, POSES) {
     if (T.wn[k + 1] < 0.8 || hypot(x, z) > 170 || nearFly(x, y, z, 1.3)) continue;
     const sc = 0.05 + 0.3 * pow(rnd(), 2), q = qRand();
     nth++ % THIN || chunks[6][cellOf(x, z)].push(x, y - sc * 0.25, z, sc, q[0], q[1], q[2], q[3], 1, rnd(), 44, 0);
+  }
+  // Borgo: stone houses at terrain height, never floating or underwater.
+  rseed(2041);
+  const homes=[[7,-14,1.00],[-9,-20,1.06],[14,-32,.90],[-13,-41,1.15],
+    [8,-52,.95],[-16,-64,1.08],[19,-68,.93],[8,13,1.05],
+    [-10,19,.90],[16,33,1.13],[-17,40,1.02]];
+  for(const [x,z,scale] of homes){
+    const y=gy(x,z);if(y>-9)continue;
+    solid(11,x,y-.14,z,scale,qAxis(0,1,0,rr(-.19,.19)),2,rnd(),1,0);
+    for(let k=0;k<24;k++){
+      const xx=x+rr(-5,5),zz=z+rr(-4,4),yy=gy(xx,zz);
+      if(abs(yy-y)>2.1)continue;
+      solid(rnd()*4|0,xx,yy+.12,zz,rr(.10,.33),qRand(),1,rnd(),1,0);
+    }
   }
   // No ship, whale fluke or bubble vents.
   // --- pack leaves (36 bytes: 8 floats + 4 unorm8), sorted by culling cell
