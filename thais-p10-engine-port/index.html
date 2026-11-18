@@ -1379,6 +1379,43 @@ function makeWorld(D, T, flyPts, POSES) {
       for (let j = 0; j < n; j++) leaf(big, x, y, z, rr(0.5, 1.4), yaw + rr(-0.9, 0.9), rr(0.3, 1.1), rr(0.06, 0.12), 0.5, zp > 0.4 && rnd() < 0.6 ? 3 : 0, rnd(), rnd(), rr(0.2, 0.6));
     }
   }
+  // P10 terrestrial prototype: castagneto layer placed onto the real
+  // GPU-density terrain, with leaf geometry handled by Abyssal's original LOD.
+  rseed(190);
+  const groveSites = [[-13,-35],[-24,-13],[18,-36],[27,5],[-14,22],
+    [-31,43],[35,38],[-7,53],[20,64],[-34,-75],[25,-80],[-47,-44]];
+  for (const [gx,gz] of groveSites) {
+    for (let treeIndex=0;treeIndex<3;treeIndex++){
+      const x=gx+rr(-5.2,5.2),z=gz+rr(-5.2,5.2);
+      if(nearPose(x,z,5.5))continue;
+      const floors=floorsAt(x,z);
+      if(!floors.length)continue;
+      const y=floors[floors.length-2];
+      if(grad(x,y,z)[1]<.62)continue;
+      const tall=rr(6.5,11.6),spread=rr(2.5,4.4);
+      // Trunk segments and branching, using the existing low-overhead
+      // procedural stem profile rather than instancing box primitives.
+      for(let j=0;j<18;j++){
+        const t=j/18;
+        leaf(big,x+sin(t*3.+x)*.13,y+t*tall*.82,z+cos(t*3.+z)*.13,
+          .63,0,.11,.18,t*tall,1,rnd(),rnd(),.25);
+      }
+      for(let j=0;j<9;j++){
+        const angle=TAU*j/9+rr(-.3,.3);
+        leaf(big,x+cos(angle)*.65,y+tall*.62+rr(0,1.0),z+sin(angle)*.65,
+          rr(2.6,3.9),angle,.68,.12,tall*.6,1,rnd(),rnd(),.35);
+      }
+      const amount=LV===0?700:LV===1?400:230;
+      for(let j=0;j<amount;j++){
+        const angle=rr(0,TAU),rad=pow(rnd(),.64)*spread;
+        const cx=x+cos(angle)*rad,cz=z+sin(angle)*rad;
+        const v=sqrt(max(0.,1.-rad*rad/(spread*spread)));
+        const cy=y+tall*.70+rr(-1.,1.)+v*rr(0.,tall*.30);
+        leaf(big,cx,cy,cz,rr(.38,.86),angle+rr(-1,1),
+          rr(.25,1.4),rr(.13,.30),cy-y,0,rnd(),rnd(),rr(.25,.70));
+      }
+    }
+  }
   // --- ground cover: dense carpets of small tufts in the magenta patches
   rseed(4);
   for (const p of MAGENTA) for (let i = p[2] * p[2] * PI * 45; i > 0; i--) {
