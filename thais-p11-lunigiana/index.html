@@ -2,7 +2,7 @@
 <html lang=en>
 <head>
 <meta charset=utf-8>
-<title>Thais · Abyssal Engine Port</title>
+<title>Thais in Lunigiana · Terra Viva · WebGPU</title>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <meta name=theme-color content=#03131c>
 <style>
@@ -118,6 +118,11 @@ svg { width: 1.5em; height: 1.5em; fill: currentColor; }
   white-space: pre-wrap; text-shadow: 0 1px 4px #000; pointer-events: none;
 }
 #m h1{color:#f4e3bd;text-shadow:0 .1em .8em #0e221c}#d{background:linear-gradient(#f2d9a8,#bd975d);color:#203026}html{background:#253328}body{background:radial-gradient(#52634a,#1b2928 78%);color:#f6edd5}#q .on{background:linear-gradient(#f2d9a8,#bd975d);color:#203026}
+/* P11 open-air Lunigiana visual identity */
+body{color:#f9efd9;background:radial-gradient(ellipse at 55% 20%,#536a56,#182b2b 80%)}
+#q span{color:#eed4a8}#q button:hover{background:#e6c88733}
+#o{box-shadow:inset 0 0 0 2px #d9b987;background:#243932e3}
+#k b{background:#eddfc4;color:#27352d}#i{text-shadow:0 2px 7px #15251e}
 </style>
 </head>
 <body class=l>
@@ -125,14 +130,14 @@ svg { width: 1.5em; height: 1.5em; fill: currentColor; }
 <div id=m>
   <h1>Thais · Terra di Lunigiana</h1><p style="max-width:36em;font-size:.75em;color:#e7dcc0">P11 · Terra di Lunigiana: paesaggio terrestre sul vero renderer WebGPU di Abyssal Garden, castagni, architettura medievale, camera a piedi e atmosfera di collina.</p>
   <div id=a>
-    <div id=l><div id=p><i id=b></i></div><p id=s>Preparazione GPU del paesaggio…</p><p id=w hidden>Use Google Chrome for optimal experience</p></div>
+    <div id=l><div id=p><i id=b></i></div><p id=s>Preparazione GPU del paesaggio…</p><p id=w hidden>Per migliori prestazioni usa Chrome o Edge aggiornati</p></div>
     <div id=g>
       <button id=d>Esplora il paesaggio</button>
       <p id=q><span>Qualità</span><button>Low</button><button>Medium</button><button>High</button></p>
       <div id=k>
         <p>
           <i><b>W</b><b>A</b><b>S</b><b>D</b></i>Cammina
-          <i><b>Q</b><b>E</b></i>Abbassati / salto
+          <i><b>E</b></i>Salto
           <i><b>Shift</b></i>Corri
           <i><b>1</b>–<b>6</b></i>Scorci
         </p>
@@ -972,6 +977,12 @@ fn landSky(rd:vec3f)->vec3f{
  sky+=vec3f(.48,.31,.16)*pow(solar,13.);
  let haze=pow(1.-abs(rd.y),7.);
  sky=mix(sky,vec3f(.67,.64,.55),haze*.21);
+ let c0=textureSample(tD,sR,rd.xz*1.87+vec2f(g.cam.w*.00008,rd.y*.36));
+ let c1=textureSample(tD,sR,rd.zx*2.43+vec2f(.36,g.cam.w*.00006));
+ let clouds=ss(.48,.78,c0.a*.64+c1.b*.36);
+ clouds*=ss(.045,.22,rd.y)*ss(.80,.30,rd.y);
+ let warm=vec3f(.88,.81,.69)*(.77+.23*solar);
+ sky=mix(sky,warm,clouds*.55);
  return sky;
 }
 @vertex fn vs(@builtin(vertex_index) i:u32)->VO{
@@ -1703,7 +1714,8 @@ const ctx = canvas.getContext('webgpu'), FMT = navigator.gpu.getPreferredCanvasF
 const Q = device.queue, HDR = 'rgba16float', DEPTH = 'depth32float';
 const TU = GPUTextureUsage, BU = GPUBufferUsage, SS = GPUShaderStage;
 
-const mod = (code) => device.createShaderModule({ code });
+const shaderModules=[];
+const mod=(code)=>{const m=device.createShaderModule({code});shaderModules.push(m);return m;};
 const buf = (data, usage) => { const b = device.createBuffer({ size: Math.max(4,(data.byteLength + 3) & ~3), usage: usage | BU.COPY_DST }); if(data.byteLength) Q.writeBuffer(b, 0, data.buffer || data, data.byteOffset || 0, data.byteLength); return b; };
 const tex = (w, h, format, usage, o = {}) => device.createTexture({ size: [w, h, o.d || 1], format, usage, mipLevelCount: o.mips || 1, sampleCount: o.samples || 1, dimension: o.d ? '3d' : '2d' });
 
@@ -2400,7 +2412,13 @@ document.addEventListener('pointerlockchange', () => ui(!document.pointerLockEle
 
 // draw the first frame and wait for the GPU to finish it (pipelines get compiled on first use) before the reveal
 lookAt(...POSES[0]);
-await say('Letting the light in…', 1, 400);
+await say('Verifica shader WGSL e materiali…', .97, 240);
+for(let i=0;i<shaderModules.length;i++){
+ const info=await shaderModules[i].getCompilationInfo();
+ const errors=info.messages.filter(x=>x.type==='error');
+ if(errors.length)throw Error('Shader '+i+': '+errors.slice(0,3).map(x=>x.message+' (riga '+x.lineNum+')').join('; '));
+}
+await say('Il paesaggio prende luce…', 1, 400);
 render(); await Q.onSubmittedWorkDone();
 setTimeout(keep, 15e3, 'abyssalLoad', ''); // the load counts as survived after 15 s of frames
 ui(true);
