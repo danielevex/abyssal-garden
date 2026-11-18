@@ -1,0 +1,861 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#162a28">
+<title>Thais in Lunigiana · Verrucola — WebGPU</title>
+<style>
+:root{color-scheme:dark;--ink:#0f2826;--gold:#f4d59d;--cream:#fff4d8}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#192d2d;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--cream)}canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}#stage{position:absolute;inset:0}#wash{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 85% 75% at 53% 43%,transparent 38%,rgba(8,24,29,.25) 85%,rgba(8,24,29,.39));z-index:2}#brand{position:absolute;top:22px;left:34px;z-index:3;text-shadow:0 2px 12px #10211ed9;pointer-events:none}#brand small{display:block;color:var(--gold);font:750 10px/1.4 system-ui;letter-spacing:.25em;text-transform:uppercase}#brand b{display:block;color:#fff3df;font:500 28px/1.2 Georgia,serif;letter-spacing:-.03em}#status{position:absolute;bottom:18px;right:23px;color:#f6e5beaa;font:11px/1.5 ui-monospace,monospace;text-align:right;pointer-events:none;z-index:3}#overlay{position:absolute;inset:0;display:grid;align-items:center;z-index:4;background:linear-gradient(90deg,#0e2426e8 0%,#10292ac5 34%,#10282948 68%,transparent 100%);transition:opacity .5s,visibility .5s}#overlay.hide{opacity:0;visibility:hidden;pointer-events:none}#panel{margin-left:clamp(25px,7vw,145px);max-width:540px;padding:20px;text-shadow:0 3px 14px #172625}#panel .eyebrow{font:750 11px system-ui;letter-spacing:.27em;color:#e7cd98;text-transform:uppercase}#panel h1{font:400 clamp(64px,8.5vw,124px)/.84 Georgia,serif;letter-spacing:-.065em;margin:20px 0 7px}#panel h1 i{font-style:italic;color:#efd39d}#panel h2{font:normal clamp(19px,2.4vw,28px) Georgia,serif;color:#e9c996;margin:22px 0 10px}#panel p{font:400 15px/1.8 system-ui;color:#f5ebd2e5;max-width:470px}button{cursor:pointer;border:1px solid #e8ce967a;background:rgba(19,39,38,.86);color:var(--cream);padding:11px 14px;border-radius:10px;font:700 13px system-ui}button:hover{background:#33584c}#start{margin-top:25px;padding:16px 26px;border:1px solid #ffefc7;color:#17322c;background:linear-gradient(135deg,#f8dfab,#e3b972);letter-spacing:.075em;text-transform:uppercase;box-shadow:0 5px 27px #0006}#note{margin-top:22px;color:#f1e3cbaf;font:12px/1.6 system-ui;max-width:460px}#top{position:absolute;right:24px;top:20px;display:flex;gap:10px;z-index:3}#top button{display:none;backdrop-filter:blur(6px)}#hud{display:none;position:absolute;left:24px;bottom:23px;z-index:3;background:#122f2ac7;border:1px solid #e4d6a34e;border-radius:12px;padding:12px 16px;box-shadow:0 8px 24px #0005}#hud strong{display:block;color:#efd69e;font:600 16px Georgia,serif}#hud span{display:block;font:11px/1.6 system-ui;color:#fff1d8cd;margin-top:3px}#hud em{display:block;font:11px ui-monospace,monospace;color:#b5e2d2;margin-top:5px;font-style:normal}#failure{display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#102c2be8;border:1px solid #e8b57f;border-radius:14px;padding:25px;z-index:10;width:min(600px,90vw);line-height:1.6}#touch{position:absolute;inset:0;z-index:3;display:none;pointer-events:none}#stick{pointer-events:auto;position:absolute;left:6vw;bottom:9vh;width:126px;height:126px;border:2px solid #ffe4a67a;border-radius:100%;background:#12403888;touch-action:none}#nub{position:absolute;width:39px;height:39px;left:42px;top:42px;border-radius:50%;background:#ebd7ac;box-shadow:0 2px 12px #0007}#touchLabel{position:absolute;bottom:16vh;right:6vw;background:#1c433a8d;border:1px solid #cbb68d88;padding:11px 13px;border-radius:8px;font:12px system-ui}#reticle{position:absolute;left:50%;top:49%;width:5px;height:5px;border:1px solid #ffefd5cc;border-radius:50%;z-index:2;display:none;pointer-events:none}#credit{position:absolute;right:24px;bottom:25px;z-index:2;text-align:right;color:#fae9c8b5;font:italic 13px Georgia,serif;pointer-events:none;text-shadow:0 2px 10px #132824}#credit b{display:block;font-size:22px;color:#fff1d5}#progress{position:absolute;left:0;top:0;height:3px;width:0;background:#edcf90;z-index:5;transition:width .3s}@media(max-width:700px){#brand{left:14px;top:11px}#brand b{font-size:18px}#brand small{font-size:8px}#panel{margin-left:0;padding:18px}#panel h1{font-size:62px}#panel h2{font-size:21px}#panel p{font-size:13px}#credit{display:none}#hud{bottom:9px;right:8px;left:auto;padding:8px}#hud span{display:none}#top{top:10px;right:10px}#status{bottom:7px;right:10px;font-size:9px}#failure{font-size:13px}}
+</style>
+</head>
+<body>
+<div id="stage"></div><div id="wash"></div><div id="progress"></div>
+<div id="brand"><small>Cozy Paw Worlds · WebGPU P07</small><b>Thais in Lunigiana</b></div>
+<div id="top"><button id="quality" type="button">Qualità: Alta</button><button id="menu" type="button">☰ Menu</button></div>
+<div id="hud"><strong>Il Giardino Segreto</strong><span>WASD · Mouse · Shift per correre · Esc per il menu</span><em id="stats">WebGPU · in preparazione</em></div>
+<div id="credit"><b>Verrucola</b>ispirato ai borghi della Lunigiana</div>
+<div id="touch"><div id="stick"><div id="nub"></div></div><div id="touchLabel">Trascina per guardare ↗</div></div><div id="reticle"></div>
+<div id="overlay"><div id="panel"><div class="eyebrow">Lunigiana · un borgo generato dalla matematica</div><h1>Thais <i>in</i><br>Lunigiana</h1><h2>Abyssal Light · Il Giardino Segreto</h2><p>La luce del pomeriggio attraversa i vicoli in pietra, il vento muove le fronde dei castagni e un antico borgo prende forma. Una prima passeggiata in un nuovo mondo procedurale.</p><button id="start" type="button">✦ Esplora il borgo</button><div id="note">P07 · Abyssal Light: luce cinematografica, micro-rilievi procedurali, ombre filtrate e foschia volumetrica simulata. WebGPU nativo. Esperimento grafico. WebGPU nativo, ispirato a Verrucola. Thais giocabile e missioni arriveranno dopo la valutazione dell'ambiente.</div></div></div>
+<div id="status">Generazione procedurale in corso…</div><div id="failure" role="alert"></div>
+<script type="module">
+/* Thais in Lunigiana — native WebGPU village renderer.
+ * Procedural geometry, materials, terrain and atmosphere. No Three.js, no external files.
+ * Experimental environment prototype, independent of original Abyssal Garden core.
+ */
+const $=s=>document.getElementById(s);
+const status=$('status'),bar=$('progress'),touch=matchMedia('(pointer:coarse)').matches;
+const clamp=(x,a,b)=>Math.max(a,Math.min(x,b)),mix=(a,b,t)=>a+(b-a)*t,smooth=x=>x*x*(3-2*x);
+let seed=20261118;
+function rnd(){seed=(seed+0x6D2B79F5)|0;let t=Math.imul(seed^(seed>>>15),1|seed);t=(t+Math.imul(t^(t>>>7),61|t))^t;return ((t^(t>>>14))>>>0)/4294967296}
+const rr=(a,b)=>a+(b-a)*rnd(),pick=a=>a[Math.floor(rnd()*a.length)];
+const hash=(x,z)=>{let n=Math.sin(x*127.1+z*311.7)*43758.5453123;return n-Math.floor(n)};
+function noise(x,z){let a=Math.floor(x),b=Math.floor(z),u=smooth(x-a),v=smooth(z-b);return mix(mix(hash(a,b),hash(a+1,b),u),mix(hash(a,b+1),hash(a+1,b+1),u),v)}
+function fbm(x,z){let s=0,a=.5;for(let i=0;i<5;i++){s+=noise(x,z)*a;a*=.5;x=x*2.07+19;z=z*2.03+31}return s}
+const bends=z=>1.85*Math.sin(z*.050)+.67*Math.sin(z*.116)-.1;
+const streetHeight=z=>(18-z)*.082+.12*Math.sin(z*.13);
+function ground(x,z){const dx=Math.abs(x-bends(z)),side=smooth(clamp((dx-5.2)/22,0,1));return streetHeight(z)-.19+side*(3.2+13*fbm(x*.016,z*.014)+5*fbm(x*.045,z*.036))}
+function targetRoad(z){return streetHeight(z)}
+const M={STONE:0,DARK:1,PLASTER:2,WOOD:3,ROOF:4,COBBLE:5,LEAF:6,IRON:7,GLASS:8,TRIM:9,TERRAIN:10,MOSS:11,FLOWER:12};
+const boxes=[],pavers=[],leaves=[],mesh=[];
+function put(x,y,z,w,h,d,mat,tint=[1,1,1],rot=0,occ=1){boxes.push(x,y,z,mat,w,h,d,rot,tint[0],tint[1],tint[2],occ)}
+function pebble(x,y,z,w,h,d,tint=[1,1,1],rot=0){pavers.push(x,y,z,M.COBBLE,w,h,d,rot,...tint,1)}
+function foliage(x,y,z,w,h,d,tint=[1,1,1],rot=0){
+ // These instances now use crossed foliage cards instead of LEGO-like boxes.
+ // Keep the original pale firefly tint, but desaturate ordinary leaves.
+ const t=tint[0]>1.05?tint:tint.map((v,i)=>mix(v,[.43,.50,.31][i],.30));
+ leaves.push(x,y,z,M.LEAF,w,h,Math.max(d,w*.72),rot,...t,1)
+}
+const shade=(p,s=.12)=>p.map(x=>clamp(x*rr(1-s,1+s),.16,1.6));
+function cross(a,b){return [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]}
+const minus=(a,b)=>a.map((x,i)=>x-b[i]);
+function norm(a){let l=Math.hypot(...a)||1;return a.map(x=>x/l)};
+function poly(a,b,c,color,material=10,ao=1){const n=norm(cross(minus(b,a),minus(c,a)));for(const p of [a,b,c])mesh.push(...p,...n,0,0,...color,material)}
+function quad(a,b,c,d,color,material=10){poly(a,b,c,color,material);poly(a,c,d,color,material)}
+function beam(a,b,r,material,tint=[1,1,1],faces=7){let dir=minus(b,a),len=Math.hypot(...dir);if(len<.01)return;dir=norm(dir);let side=norm(cross(dir,Math.abs(dir[1])>.92?[1,0,0]:[0,1,0])),up=cross(dir,side);for(let i=0;i<faces;i++){let t=i*2*Math.PI/faces,u=(i+1)*2*Math.PI/faces;let q1=side.map((v,j)=>v*Math.cos(t)*r+up[j]*Math.sin(t)*r),q2=side.map((v,j)=>v*Math.cos(u)*r+up[j]*Math.sin(u)*r);const f=(point,offset)=>point.map((v,j)=>v+offset[j]);quad(f(a,q1),f(a,q2),f(b,q2),f(b,q1),tint,material)}}
+function arch(cx,cy,cz,outer,inner,depth,material,blocks=12){for(let i=0;i<blocks;i++){const a=Math.PI*i/blocks,b=Math.PI*(i+1)/blocks;const xo=Math.cos(a)*outer,yo=Math.sin(a)*outer,xi=Math.cos(a)*inner,yi=Math.sin(a)*inner;const XO=Math.cos(b)*outer,YO=Math.sin(b)*outer,XI=Math.cos(b)*inner,YI=Math.sin(b)*inner;let c=shade([.78,.75,.68],.065);let p=(x,y,z)=>[cx+x,cy+y,cz+z];quad(p(xo,yo,-depth/2),p(XO,YO,-depth/2),p(XI,YI,-depth/2),p(xi,yi,-depth/2),c,material);quad(p(xi,yi,depth/2),p(XI,YI,depth/2),p(XO,YO,depth/2),p(xo,yo,depth/2),c,material);quad(p(xi,yi,-depth/2),p(XI,YI,-depth/2),p(XI,YI,depth/2),p(xi,yi,depth/2),c,material);quad(p(xo,yo,depth/2),p(XO,YO,depth/2),p(XO,YO,-depth/2),p(xo,yo,-depth/2),c,material)}}
+
+function castleTower(cx,cy,cz,width=7,height=15){
+ const base=[.88,.87,.79];put(cx,cy+height*.5,cz,width,height,width,M.DARK,base);
+ const cyTop=cy+height;for(let y=cy+.6;y<cyTop;y+=.64)for(let k=0;k<4;k++){let x=k%2?cx+(k===1?width*.51:-width*.51):cx+rr(-width*.37,width*.37),z=k%2?cz+rr(-width*.37,width*.37):cz+(k===0?width*.51:-width*.51);put(x,y,z,.25,.23,rr(.6,1.35),M.STONE,shade([.98,.95,.86],.22))}
+ for(let s of [-1,1])for(let n=-3;n<=3;n++){put(cx+s*(width*.5-.2),cyTop+.47,cz+n*.97,.65,1.06,.65,M.STONE,shade(base,.14));put(cx+n*.97,cyTop+.47,cz+s*(width*.5-.2),.65,1.06,.65,M.STONE,shade(base,.14));}
+ for(const side of [-1,1])for(const k of [-1,0,1]){
+   let y=cy+height*.53+k*2.7;
+   put(cx+side*(width*.5+.07),y,cz,.24,1.7,.49,M.IRON,[.25,.22,.21]);
+   put(cx+side*(width*.5+.18),y,cz,.1,1.95,.68,M.TRIM,[.83,.84,.79]);
+ }
+ // corner stone supports
+ for(let xx of [-1,1])for(let zz of [-1,1]){put(cx+xx*width*.46,cy+height*.5,cz+zz*width*.46,.48,height+.15,.48,M.STONE,[1.04,1.02,.94])}
+}
+
+// Raised narrow road formed from irregular flagstones, not repeating painted squares.
+status.textContent='Scultura della strada e delle case…';bar.style.width='15%';
+// Mortar substrate follows the climbing road. It prevents the bright terrain
+// below from shining through between individual paving stones.
+for(let z=-55;z<30;z+=.42){
+ const next=Math.min(30,z+.42);
+ const x0=bends(z),x1=bends(next),y0=targetRoad(z)-.068,y1=targetRoad(next)-.068;
+ quad([x0-3.51,y0,z],[x1-3.51,y1,next],[x1+3.51,y1,next],[x0+3.51,y0,z],[.34,.32,.29],M.COBBLE);
+}
+for(let z=29;z>-55;z-=.42){let x=-3.45;while(x<3.48){let w=rr(.22,.68),dz=rr(.30,.55),xx=bends(z)+x+w*.5+rr(-.09,.09),yy=targetRoad(z)+rr(-.018,.028);const c=shade(pick([[.69,.68,.64],[.65,.65,.61],[.61,.63,.60],[.73,.69,.63],[.68,.65,.60]]),.068);pebble(xx,yy,z+rr(-.12,.12),w*.9,rr(.045,.09),dz,c,rr(-.07,.07));x+=w+rr(.005,.055)}}
+// Irregular central ruts and edge gutters; grass in mortar joints.
+for(let z=29;z>-55;z-=.92){for(const side of [-1,1]){
+ let x=bends(z)+side*3.68,y=targetRoad(z)+.015;put(x,y,z,rr(.25,.4),.15,rr(.72,1.15),M.TRIM,shade([.66,.64,.59],.07),rr(-.12,.12));
+ if(rnd()<.65){let r=rr(.06,.14);foliage(x+side*rr(-.14,.11),y+.11,z, r,rr(.23,.55),r,[.48,.66,.39]);}
+ }}
+// Coarse terrain with sculpted ridges, cambered paths, embedded rocks and earth colors.
+const N=110,span=245;
+for(let j=0;j<N;j++)for(let i=0;i<N;i++){
+ const x0=-span/2+i*span/N,z0=-span/2+j*span/N,x1=x0+span/N,z1=z0+span/N;
+ const P=(x,z)=>[x,ground(x,z),z],col=shade([.43,.51,.35],.17);
+ quad(P(x0,z0),P(x0,z1),P(x1,z1),P(x1,z0),col,M.TERRAIN)
+}
+
+// Individually sculpted polygonal stone face, with bevel and thickness.
+// Generated once during load; Abyssal-style triplanar textures do the rest.
+function chippedStone(x,y,z,w,h,facing,tint){
+ const outline=[[-.47,-.32],[-.22,-.49],[.24,-.47],[.48,-.23],[.47,.27],[.26,.48],[-.24,.47],[-.49,.21]];
+ const rim=outline.map(([u,v])=>[x+facing*rr(.027,.051),y+h*v,z+w*u]);
+ const center=[x+facing*rr(.075,.105),y+rr(-.011,.011),z+rr(-.011,.011)];
+ const back=outline.map(([u,v])=>[x-facing*.035,y+h*v,z+w*u]);
+ const tone=shade(tint,.025);
+ for(let i=0;i<rim.length;i++){
+   const j=(i+1)%rim.length;
+   if(facing>0)poly(center,rim[j],rim[i],tone,M.STONE);
+   else poly(center,rim[i],rim[j],tone,M.STONE);
+   if(facing>0)quad(rim[i],back[i],back[j],rim[j],shade(tint,.06),M.STONE);
+   else quad(rim[j],back[j],back[i],rim[i],shade(tint,.06),M.STONE);
+ }
+}
+
+function stoneWallFace(x,y,z,w,h,side,plastered=false,openings=[]){
+ const ix=side===-1?x+.065:x-.065;
+ if(plastered){
+   // Cut real voids in plaster at each window/door opening; no full white wall
+   // hiding the recessed windows. Panel seams overlap to remain invisible.
+   const unique=a=>[...new Set(a.map(v=>Math.round(v*1000)/1000))].sort((a,b)=>a-b);
+   const yCuts=unique([0,h,...openings.flatMap(o=>[clamp(o.y-y-o.h*.5,0,h),clamp(o.y-y+o.h*.5,0,h)])]);
+   const zCuts=unique([-w*.5,w*.5,...openings.flatMap(o=>[clamp(o.z-z-o.w*.5,-w*.5,w*.5),clamp(o.z-z+o.w*.5,-w*.5,w*.5)])]);
+   for(let yi=0;yi<yCuts.length-1;yi++)for(let zi=0;zi<zCuts.length-1;zi++){
+     const ya=yCuts[yi],yb=yCuts[yi+1],za=zCuts[zi],zb=zCuts[zi+1];
+     if(yb-ya<.025||zb-za<.025)continue;
+     const yy=y+(ya+yb)*.5,zz=z+(za+zb)*.5;
+     if(openings.some(o=>Math.abs(yy-o.y)<o.h*.5-.004&&Math.abs(zz-o.z)<o.w*.5-.004))continue;
+     put(x+side*.06,yy,zz,.21,(yb-ya)+.008,(zb-za)+.008,M.PLASTER,shade([.77,.72,.63],.018));
+   }
+   // Patches where old lime plaster reveals sandstone near street level.
+   for(let v=0;v<17;v++)if(rnd()<.35){
+     const zz=z+rr(-w*.43,w*.43),yy=y+rr(.65,h-.75);
+     if(openings.some(o=>Math.abs(yy-o.y)<o.h*.5+.15&&Math.abs(zz-o.z)<o.w*.5+.16))continue;
+     put(x+side*.173,yy,zz,.024,rr(.10,.39),rr(.18,.52),M.STONE,shade([.65,.63,.58],.07));
+   }
+   return;
+ }
+ for(let cy=0;cy<h;){let H=rr(.29,.56),pos=-w*.5;while(pos<w*.5){let W=Math.min(w*.5-pos,rr(.45,1.12));if(W<.13)break;let yy=y+cy+H*.49,zz=z+pos+W*.5;const rim=rnd();let tint=shade(rim<.12?[.67,.65,.60]:rim<.40?[.75,.71,.65]:[.77,.72,.65],.042);
+ const hole=openings.some(g=>Math.abs(yy-g.y)<(H*.91+g.h)*.51+.03&&Math.abs(zz-g.z)<(W*.98+g.w)*.51+.025);
+ if(!hole){
+   if(touch)put(x+side*rr(.075,.16),yy,zz,rr(.16,.23),H*.91,W*.98,M.STONE,tint,rr(-.015,.015),.79);
+   else chippedStone(x+side*.055,yy,zz,W*.95,H*.90,side,tint);
+ }
+ pos+=W+rr(.006,.022)}cy+=H+rr(.012,.04)}
+}
+function windowOnFront(x,y,z,side,short=false){
+ const h=short?.95:1.33,w=short?.65:.82;
+ // dark recessed glass, thick architraves and outward shutters
+ put(x+side*.08,y,z,.055,h,w,M.GLASS,[.25,.33,.31]);
+ put(x+side*.16,y,z,.07,.045,w*.84,M.IRON,[.46,.42,.32]);
+ put(x+side*.2,y,z,.07,h+0.21,w*.052,M.TRIM,[.99,.96,.86]);
+ for(let q of [-1,1]){
+   put(x+side*.21,y,z+q*(w*.5+.1),.19,h+.26,.13,M.TRIM,[.98,.92,.80]);
+   let rot=q*rr(.3,.6),shZ=z+q*(w*.5+.31);
+   put(x+side*.31,y,shZ,.14,h,.36,M.WOOD,shade([.43,.48,.37],.075),rot);
+   for(let n=0;n<5;n++)put(x+side*.40,y-h*.38+n*h*.19,shZ,.02,.034,.37,M.DARK,[.28,.33,.26],rot);
+ }
+ put(x+side*.27,y+h*.58,z,.36,.16,w+.55,M.TRIM,[.98,.95,.86]);
+ put(x+side*.24,y-h*.62,z,.32,.15,w+.42,M.TRIM,[.91,.86,.74]);
+ // wrought iron divided glass
+ put(x+side*.22,y,z,.11,h,.035,M.IRON,[.34,.31,.28]);
+ for(let q of [-.22,.22])put(x+side*.23,y+h*q,z,.11,.037,w,M.IRON,[.27,.24,.21]);
+}
+function portal(x,y,z,side,big=false){
+ const w=big?2.4:1.65,h=big?3.5:2.55;
+ put(x+side*.1,y+h*.48,z,.06,h*.86,w*.83,M.WOOD,[.46,.28,.18]);
+ for(let k=-2;k<=2;k++)put(x+side*.20,y+h*.44,z+k*w*.16,.09,h*.8,.032,M.WOOD,shade([.58,.38,.23],.12));
+ for(let yy of [.48,1.54])put(x+side*.25,y+yy,z,.07,.06,w*.78,M.IRON,[.23,.24,.20]);
+ put(x+side*.27,y+1.0,z+w*.22,.08,.12,.09,M.TRIM,[.79,.63,.33]);
+ for(let q of [-1,1])put(x+side*.13,y+h*.42,z+q*w*.51,.36,h*.81,.26,M.TRIM,[.81,.80,.74]);
+ // arch of real tessellated voussoirs
+ arch(x+side*.18,y+h*.74,z,w*.53,w*.40,.28,M.TRIM,12);
+ put(x+side*.28,y+.07,z,.42,.15,w+.45,M.TRIM,[.76,.76,.69]);
+}
+// Terracotta sloped roofs: tessellated surface + independently instanced roll tiles.
+function roof(cx,base,cz,width,depth,peak=2.1){
+ const y=base,half=width*.5+.46,z0=cz-depth*.5-.50,z1=cz+depth*.5+.50;
+ for(const dir of [-1,1]){
+  const a=[cx,y+peak,z0],b=[cx+dir*half,y,z0],c=[cx+dir*half,y,z1],d=[cx,y+peak,z1];
+  quad(a,b,c,d,shade([.75,.34,.21],.12),M.ROOF);
+  for(let u=.15;u<half;u+=.34)for(let zz=z0+.22;zz<z1;zz+=.43){
+    let xx=cx+dir*u,yy=y+peak*(1-u/half)+.063;
+    const clr=shade(pick([[1,.90,.76],[.93,.77,.63],[.83,.66,.55],[1,.83,.64]]),.13);
+    // rolled roofing tiles with specular glancing highlights
+    put(xx,yy,zz+.10,.31,.062,.38,M.ROOF,clr,0);
+    if(rnd()<.14)put(xx,yy+.042,zz-.07,.27,.047,.05,M.ROOF,[1.06,1.02,.88]);
+  }
+ }
+ put(cx,y+peak+.08,cz,width*.14,.21,depth+1.13,M.ROOF,[.87,.73,.62]);
+ for(const k of [-1,1])put(cx+k*half,y-.08,cz,.14,.20,depth+1.0,M.WOOD,[.39,.27,.19]);
+}
+const houseBlueprints=[
+ [-1,23,7.4,8.1,7.8,0],[-1,13,8.4,7.4,9.7,1],[-1,4,7.6,8.1,8.8,0],[-1,-6.0,8.6,9.0,10.5,2],[-1,-17.4,7.6,7.0,8.8,0],[-1,-28.6,8.6,8.2,9.9,1],
+ [1,22,7.1,8.0,9.1,1],[1,12,7.7,8.5,8.5,0],[1,1,8.3,7.8,10.4,1],[1,-9.2,7.2,8.1,9.1,0],[1,-19.7,8.0,9.0,10.4,2],[1,-31.2,7.7,7.8,9.2,0]
+];
+function ivy(front,base,z,side,h){
+ let count=touch?35:95,px=front+side*.22,pz=z;
+ for(let j=0;j<count;j++){const v=rr(0,h),dz=rr(-1.0,1.1),x=px+side*.03+rr(-.05,.05);const a=rr(.13,.26);
+ foliage(x,base+v,pz+dz,a,rr(.11,.22),a,shade(pick([[.45,.62,.38],[.40,.60,.30],[.55,.69,.34],[.65,.67,.36]]),.12),rr(-2,2))
+ }
+ for(let k=0;k<5;k++){beam([px,base+.3,pz+rr(-.15,.15)],[px+side*.1,base+rr(h*.3,h*.92),pz+rr(-.8,.8)],.025,M.MOSS,[.45,.43,.24],5)}
+}
+function house(side,z,w,d,h,variation){
+ const offset=rr(.05,.78),cx=bends(z)+side*(3.68+w*.5+.12+offset),y=targetRoad(z)-.17,front=cx-side*w*.5-side*.025;
+ // The outward direction points into the street, opposite the side of the building.
+ const facadeSide=-side;
+ const pl=variation===1,base=variation===2?[.80,.78,.71]:[.82,.79,.72];
+ const openings=[],windows=[];
+ const doorZ=z+rr(-.55,.55),doorWidth=variation===2?2.4:1.65,doorHeight=variation===2?3.5:2.55;
+ openings.push({y:y+doorHeight*.47,z:doorZ,w:doorWidth*.88,h:doorHeight*.95});
+ for(let level=1;level<4;level++){
+   let yy=y+level*2.3+.4;if(yy+1>y+h-.75)break;
+   // Medieval façades are asymmetrical: not every floor has identical pairs.
+   const slots=(variation===0&&level===1)||(variation===2&&level===2)?[0]:[-1,1];
+   for(const j of slots){
+     let zz=z+j*d*.25+rr(-.12,.12),short=level===3;
+     windows.push([yy,zz,short]);
+     openings.push({y:yy,z:zz,w:short?.80:1.03,h:short?1.06:1.49});
+   }
+ }
+ // True building volume: side elevations, rear, corner buttresses
+ put(cx,y+h*.48,z,w*.89,h*.96,d*.94,pl?M.PLASTER:M.DARK,shade(pl?base:[.48,.47,.44],.045));
+ // front relief masonry: not just a repeated UV brick texture
+ stoneWallFace(front,y,z,d,h,facadeSide,pl,openings);
+ for(let end of [-1,1]){
+   let zz=z+end*d*.5,sideWall=pl?M.PLASTER:M.STONE;
+   put(cx,y+h*.48,zz,w*.94,h*.96,.31,sideWall,shade(base,.1));
+   for(let n=0;n<5;n++){let yy=y+rr(.5,h-1),xx=cx+rr(-w*.33,w*.33);if(rnd()<.5)put(xx,yy,zz+end*.17,rr(.26,.55),rr(.15,.36),.10,M.STONE,shade([.76,.73,.66],.07))}
+ }
+ // robust carved limestone quoins, each has a non-repeating size
+ for(const zz of [z-d*.48,z+d*.48])for(let ht=.28;ht<h;ht+=.62){put(front+facadeSide*.12,y+ht,zz,.42,rr(.36,.55),rr(.54,.74),M.TRIM,shade([.76,.74,.68],.07));}
+ // heavy stringcourses / rustic cornice with projecting shadows
+ for(let ht=2.75;ht<h-1.1;ht+=2.8)put(front+facadeSide*.20,y+ht,z,.35,.14,d+.25,M.TRIM,shade([.86,.82,.72],.1));
+ put(front+facadeSide*.20,y+h-.2,z,.53,.29,d+.5,M.TRIM,[.87,.85,.78]);
+ // window distribution: real panels, shutters, niches
+ for(const [yy,zz,short] of windows)windowOnFront(front,yy,zz,facadeSide,short);
+ portal(front,y,doorZ,facadeSide,variation===2);
+ roof(cx,y+h,z,w,d,rr(1.2,2));
+ // chimney and chimney rim
+ if(rnd()<.80){let tx=cx+rr(-w*.25,w*.25),tz=z+rr(-d*.3,d*.3);
+   put(tx,y+h+2.0,tz,.9,2.4,.8,M.STONE,[.93,.84,.69]);put(tx,y+h+3.2,tz,1.08,.22,.96,M.TRIM,[.81,.76,.68]);}
+ // roof braces, hanging terracotta flower pot, plants
+ if(rnd()<.82){let yy=y+rr(2.5,3.2),zz=z+rr(-d*.3,d*.3);
+   put(front+facadeSide*.44,yy,zz,.73,.17,.84,M.TRIM,[.72,.72,.63]);
+   put(front+facadeSide*.55,yy+.29,zz,.42,.47,.47,M.ROOF,[.76,.66,.58]);
+   for(let n=0;n<7;n++){
+     foliage(front+facadeSide*.55+rr(-.11,.11),yy+.62+rr(-.1,.18),zz+rr(-.2,.2),.12,.26,.2,[.48,.63,.38]);
+     if(n<4)put(front+facadeSide*.61+rr(-.1,.1),yy+.75+rr(-.03,.12),zz+rr(-.2,.2),.09,.09,.09,M.FLOWER,pick([[1,.59,.48],[.89,.79,.46],[.85,.56,.66]]));
+   }
+ }
+ if(rnd()<.74)ivy(front,y+rr(.4,1.0),z+rr(-d*.35,d*.35),facadeSide,rr(3.5,7.3));
+ // warm wrought iron lanterns: these produce emissive bloom in the shader
+ for(let n=0;n<(z<11?1:0);n++){
+   let ly=y+rr(2.1,2.8),lz=z+rr(-d*.38,d*.38);
+   put(front+facadeSide*.36,ly+.30,lz,.62,.09,.07,M.IRON,[.32,.31,.28]);
+   put(front+facadeSide*.64,ly-.05,lz,.28,.45,.28,M.GLASS,[.94,.70,.40]);
+   put(front+facadeSide*.63,ly+.25,lz,.36,.11,.37,M.IRON,[.30,.25,.20]);
+ }
+}
+// One lot opens toward an orchard courtyard: the street no longer reads as
+// two unbroken rows of houses with no side destinations.
+for(const b of houseBlueprints)if(!(b[0]===-1&&b[1]===-17.4))house(...b);
+status.textContent='Costruzione delle porte e del castello…';bar.style.width='50%';
+// Gate and landmark tower at a bend of the street: traversable arch (no solid plug).
+const gateZ=-41,gateX=bends(gateZ),gateY=targetRoad(gateZ);
+for(let side of [-1,1]){
+ put(gateX+side*4.7,gateY+6.3,gateZ,3.1,12.6,5.4,M.STONE,[.83,.81,.73]);
+ put(gateX+side*3.55,gateY+5.7,gateZ,1.0,11.4,5.8,M.TRIM,[.83,.83,.77]);
+}
+// arched overhead lintel above opening, precisely leaving room for the player
+arch(gateX,gateY+6.5,gateZ,4.0,3.3,5.7,M.TRIM,24);
+put(gateX,gateY+10.75,gateZ,9.4,1.5,5.8,M.STONE,[.89,.86,.77]);
+for(let k=-4;k<=4;k++)put(gateX+k*1.03,gateY+12.0,gateZ,1.00,1.55,4.9,M.STONE,shade([.86,.84,.73],.13));
+castleTower(gateX-10.9,gateY-1.2,gateZ-13.5,9.1,19.2);
+// Antique clock face / slit windows on tower
+put(gateX-10.9,gateY+12.0,gateZ-8.75,1.7,1.7,.24,M.TRIM,[.86,.83,.71]);
+put(gateX-10.9,gateY+12.0,gateZ-8.56,1.1,1.1,.07,M.DARK,[.24,.24,.20]);
+
+// Small stone walls / hillside orchard and chestnut woods.
+function tree(x,z,sz=1){
+ const y=ground(x,z),hh=rr(4.3,7.5)*sz;
+ beam([x,y,z],[x+rr(-.25,.22),y+hh,z+rr(-.25,.22)],rr(.15,.27)*sz,M.WOOD,[.52,.47,.35],7);
+ const top=[x+rr(-.32,.32),y+hh,z+rr(-.28,.28)];
+ for(let k=0;k<6;k++){
+   const a=rr(0,Math.PI*2),r=rr(1.2,2.7)*sz,p=[top[0]+Math.cos(a)*r,top[1]+rr(-.6,1.0)*sz,top[2]+Math.sin(a)*r];
+   beam(top,p,rr(.045,.09)*sz,M.WOOD,[.46,.4,.30],5)
+ }
+ let count=touch?58:155;
+ for(let k=0;k<count;k++){
+   let a=rr(0,Math.PI*2),r=Math.sqrt(rnd())*rr(1.4,3.1)*sz,v=rr(-.8,1.8)*sz;
+   let xx=top[0]+Math.cos(a)*r,yy=top[1]+v,zz=top[2]+Math.sin(a)*r;
+   foliage(xx,yy,zz,rr(.18,.42)*sz,rr(.11,.3)*sz,.05,shade(pick([[.55,.67,.37],[.67,.68,.38],[.47,.59,.36],[.73,.63,.39]]),.16),a);
+ }
+}
+// A small stone-paved courtyard and octagonal communal well, reached via a
+// gap in the left-hand row. All landmarks share the deterministic world seed.
+{
+ const cz=-17.4,cx=bends(cz)-7.05,base=targetRoad(cz)+.10;
+ // Part of the existing sloping terrain is kept as a natural orchard background.
+ for(let z=-23.5;z<-11.4;z+=1.2){
+   if(z>-19.4&&z<-15.5)continue; // walkable side opening
+   const x=bends(z)-5.35,y=targetRoad(z);
+   put(x,y+.45,z,.48,.86,1.16,M.STONE,shade([.69,.65,.58],.075));
+   put(x,y+.91,z,.62,.14,1.24,M.TRIM,shade([.76,.72,.64],.045));
+ }
+ const edge=14,radius=1.13;
+ // A faceted stone ring, with an actual dark recessed water surface.
+ for(let j=0;j<edge;j++){
+   const a=j*Math.PI*2/edge,b=(j+1)*Math.PI*2/edge;
+   for(const ht of [.26,.62]){
+     beam([cx+radius*Math.cos(a),base+ht,cz+radius*Math.sin(a)],
+          [cx+radius*Math.cos(b),base+ht,cz+radius*Math.sin(b)],
+          .205,M.STONE,shade([.72,.69,.62],.055),6);
+   }
+   const a2=(a+b)*.5;
+   put(cx+radius*.95*Math.cos(a2),base+.42,cz+radius*.95*Math.sin(a2),
+       .29,.56,.29,M.DARK,[.53,.51,.46],-a2);
+   const p1=[cx+radius*.74*Math.cos(a),base+.43,cz+radius*.74*Math.sin(a)];
+   const p2=[cx+radius*.74*Math.cos(b),base+.43,cz+radius*.74*Math.sin(b)];
+   poly([cx,base+.43,cz],p2,p1,[.18,.27,.27],M.GLASS);
+ }
+ // A few old paving slabs create a threshold to the orchard.
+ for(let z=-19.2;z<-15.5;z+=.5)for(let x=-6.3;x<-3.6;x+=.58){
+   const xx=bends(z)+x;
+   put(xx,targetRoad(z)+.035,z,.51,.07,.42,M.COBBLE,shade([.66,.64,.58],.07),rr(-.06,.06));
+ }
+ // Chestnut trees and low planting outside the passage.
+ for(const [x,z,sz] of [[-12.7,-21.1,.82],[-14.4,-12.6,.74]]){
+   tree(bends(z)+x,z,sz);
+ }
+}
+// P06: La strada finalmente si apre in un giardino esplorabile, non una semplice quinta scenica.
+// Le geometrie sono generate una volta sola; i dettagli vegetali restano istanziati sulla GPU.
+function secretGarden(){
+ const zc=-17.4, xc=bends(zc)-7.05,level=targetRoad(zc)+.10;
+ const slab=(x,z,w,d,t=.0)=>{
+   const y=targetRoad(z)+.075+t;
+   put(x,y,z,w,.13,d,M.COBBLE,shade([.76,.72,.64],.08),rr(-.08,.08));
+ };
+ // Percorso fisico che collega la via principale al pozzo.
+ for(let z=-19.0;z<=-15.6;z+=.58){
+   for(let x=bends(z)-3.8;x>=xc+.9;x-=.70) slab(x,z,.62,.49,rr(-.01,.02));
+ }
+ // Piccola terrazza: ci si può muovere fino al limite del prato in ombra.
+ for(let zz=-23;zz<=-11.7;zz+=.85){
+   for(let xx=xc-3.3;xx<=xc+2.7;xx+=.82){
+     const rad=Math.hypot(xx-xc,zz-zc);
+     if(rad<1.75||rnd()<.24)continue;
+     slab(xx+rr(-.04,.04),zz,.71,.72,-.035);
+   }
+ }
+ // Muretto che segue la vegetazione, con un'apertura al centro.
+ for(let zz=-23.4;zz<-11.3;zz+=.75){
+   if(zz>-18.7&&zz<-16.2)continue;
+   const px=xc-3.8,py=targetRoad(zz);
+   put(px,py+.48,zz,.64,.93,.70,M.STONE,shade([.69,.67,.59],.09));
+   put(px,py+.99,zz,.78,.13,.85,M.TRIM,[.8,.77,.68]);
+ }
+ // Pergolato antico: pilastri, travi di castagno, rose e vite.
+ for(const zz of [-22.3,-19.9,-14.6,-12.2]){
+   const py=targetRoad(zz);
+   for(const xx of [xc-2.7,xc+1.7]){
+     beam([xx,py,zz],[xx,py+3.85,zz],.16,M.WOOD,[.39,.30,.20],7);
+     put(xx,py+.18,zz,.48,.36,.48,M.STONE,[.8,.74,.63]);
+   }
+   beam([xc-2.7,py+3.85,zz],[xc+1.7,py+3.85,zz],.15,M.WOOD,[.42,.32,.22],6);
+ }
+ for(let zz=-22.3;zz<=-12.2;zz+=.54){
+   let yy=targetRoad(zz)+3.88;
+   beam([xc-2.7,yy,zz],[xc+1.7,yy,zz],.065,M.WOOD,[.49,.37,.25],5);
+   for(let k=0;k<(touch?5:10);k++){
+     let xx=rr(xc-2.6,xc+1.6),z=zz+rr(-.34,.34);
+     foliage(xx,yy+rr(-.12,.13),z,rr(.26,.46),rr(.20,.36),.07,shade(pick([[.42,.61,.32],[.55,.68,.36],[.34,.51,.28]]),.09),rr(-3,3));
+     if(rnd()<.23)put(xx,yy-.22,z,.10,.10,.10,M.FLOWER,pick([[1.1,.72,.53],[.93,.58,.65],[.97,.89,.64]]));
+   }
+ }
+ // Aiuole di erbe e fiori, piantate vicino ai muretti e non al centro della passeggiata.
+ for(let i=0;i<(touch?170:430);i++){
+   let xx=rr(xc-4.6,xc+3.3),zz=rr(-24,-11.3);
+   if(Math.hypot(xx-xc,zz-zc)<1.7||Math.abs(xx-(xc-1.6))<.8)continue;
+   let yy=targetRoad(zz);
+   foliage(xx,yy+rr(.14,.36),zz,rr(.09,.25),rr(.27,.63),.08,shade(pick([[.34,.53,.29],[.51,.61,.33],[.68,.66,.39]]),.17),rr(-3,3));
+   if(rnd()<.12)put(xx,yy+.55,zz,.09,.10,.09,M.FLOWER,pick([[.99,.72,.48],[.95,.56,.59],[.96,.91,.78]]));
+ }
+ // Intorno al pozzo: pietre consunte e piccole brocche di terracotta.
+ for(let a=0;a<Math.PI*2;a+=Math.PI/3){
+   const xx=xc+2.16*Math.cos(a),zz=zc+2.16*Math.sin(a);
+   put(xx,level+.17,zz,.48,.34,.47,M.ROOF,[.76,.50,.32],a);
+   foliage(xx,level+.51,zz,.34,.36,.35,[.47,.61,.34],a);
+ }
+}
+secretGarden();
+for(let n=0;n<(touch?60:125);n++){
+ const z=rr(-110,40),x=rr(-67,67),dx=Math.abs(x-bends(z));
+ if(dx<11 || (z>-10&&z<23&&dx<17) || (z>-50&&z<-34&&dx<16))continue;
+ tree(x,z,rr(.6,1.2));
+}
+// Foreground stones, grass and wildflowers around walls and path.
+for(let i=0;i<(touch?350:1000);i++){
+ const z=rr(-55,34),s=rnd()<.5?-1:1,x=bends(z)+s*rr(4.4,9.2),y=ground(x,z);
+ if(rnd()<.66)foliage(x,y+.17,z,rr(.07,.13),rr(.35,.75),.06,shade([.42,.57,.33],.12),rr(-3,3));
+ else put(x,y+.15,z,rr(.12,.45),rr(.06,.22),rr(.17,.5),M.STONE,shade([.74,.70,.57],.18),rr(-1,1));
+}
+
+// Pedestrian-scale street furniture near the walls: wooden barrels and planters.
+for(const [z,side] of [[21,1],[11,-1],[-4,1],[-16,-1],[-30,1]]){
+ const x=bends(z)+side*3.12,y=targetRoad(z);
+ beam([x,y+.26,z],[x,y+1.02,z],.31,M.WOOD,shade([.45,.32,.22],.07),9);
+ for(const v of [.27,.84])for(let k=0;k<11;k++){
+   let a=k*Math.PI*2/11,b=(k+1)*Math.PI*2/11;
+   beam([x+.325*Math.cos(a),y+v,z+.325*Math.sin(a)],
+        [x+.325*Math.cos(b),y+v,z+.325*Math.sin(b)],
+        .025,M.IRON,[.29,.28,.25],5);
+ }
+ const px=x-side*.58,pz=z+.72;
+ put(px,y+.26,pz,.56,.43,.80,M.STONE,shade([.72,.69,.63],.055));
+ put(px,y+.49,pz,.48,.09,.73,M.MOSS,[.30,.28,.22]);
+ for(let k=0;k<15;k++)foliage(px+rr(-.18,.18),y+.55+rr(.02,.40),pz+rr(-.25,.25),rr(.12,.20),rr(.18,.36),.08,shade([.37,.47,.26],.11),rr(-2,2));
+}
+
+// Some drifting dust/pollen represented as tiny emissive leaves.
+for(let k=0;k<(touch?120:420);k++){
+ let z=rr(-51,32),x=bends(z)+rr(-7.4,7.4),y=targetRoad(z)+rr(1,9);
+ foliage(x,y,z,.055,.055,.025,[1.25,1.19,.78],rr(-3,3));
+}
+
+function matrixMul(a,b){const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+r]*b[c*4+k];o[c*4+r]=s}return o}
+const vsub=(a,b)=>a.map((x,i)=>x-b[i]),vdot=(a,b)=>a.reduce((x,q,i)=>x+q*b[i],0);
+function lookAt(eye,center,up){let z=norm(vsub(eye,center)),x=norm(cross(up,z)),y=cross(z,x);return new Float32Array([
+ x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-vdot(x,eye),-vdot(y,eye),-vdot(z,eye),1])}
+function persp(fov,aspect,n,f){let t=1/Math.tan(fov/2);return new Float32Array([t/aspect,0,0,0,0,t,0,0,0,0,f/(n-f),-1,0,0,f*n/(n-f),0])}
+function ortho(l,r,b,t,n,f){return new Float32Array([2/(r-l),0,0,0,0,2/(t-b),0,0,0,0,1/(n-f),0,-(r+l)/(r-l),-(t+b)/(t-b),n/(n-f),1])}
+
+/* Texture-baking WGSL adapted from Abyssal Garden by Maksymilian Dendura,
+   copyright (c) 2026, licensed MIT; see the parent project and LICENSE.
+   The surrounding architectural material shader is new to Thais in Lunigiana. */
+const detailShader=/* wgsl */`
+fn ss(a: f32, b: f32, x: f32) -> f32 { let t = clamp((x - a) / (b - a), 0., 1.); return t * t * (3. - 2. * t); }
+fn h31(p: vec3f) -> f32 { var q = fract(p * vec3f(.1031, .1030, .0973)); q += dot(q, q.yzx + 33.33); return fract((q.x + q.y) * q.z); }
+fn h33(p: vec3f) -> vec3f { var q = fract(p * vec3f(.1031, .1030, .0973)); q += dot(q, q.yxz + 33.33); return fract((q.xxy + q.yxx) * q.zyx); }
+fn vn(p: vec3f) -> f32 {
+  let i = floor(p); let f = fract(p); let u = f * f * (3. - 2. * f);
+  return mix(mix(mix(h31(i), h31(i + vec3f(1., 0., 0.)), u.x), mix(h31(i + vec3f(0., 1., 0.)), h31(i + vec3f(1., 1., 0.)), u.x), u.y),
+             mix(mix(h31(i + vec3f(0., 0., 1.)), h31(i + vec3f(1., 0., 1.)), u.x), mix(h31(i + vec3f(0., 1., 1.)), h31(i + vec3f(1., 1., 1.)), u.x), u.y), u.z);
+}
+fn fbm(p: vec3f, n: i32) -> f32 {
+  var a = .5; var s = 0.; var q = p;
+  for (var i = 0; i < n; i++) { s += a * vn(q); q = q * 2.03 + vec3f(17.1, 31.7, 5.3); a *= .5; }
+  return s / (1. - 2. * a);
+}
+fn wor(p: vec3f) -> f32 {
+  let i = floor(p); let f = fract(p); var d = 9.;
+  for (var x = -1; x <= 1; x++) { for (var y = -1; y <= 1; y++) { for (var z = -1; z <= 1; z++) {
+    let o = vec3f(f32(x), f32(y), f32(z)); let r = o + h33(i + o) - f; d = min(d, dot(r, r));
+  } } }
+  return sqrt(d);
+}
+
+
+@vertex fn vs(@builtin(vertex_index) i: u32) -> @builtin(position) vec4f { return vec4f(f32(i32(i & 1u) * 4 - 1), f32(i32(i >> 1u) * 4 - 1), 0., 1.); }
+
+
+fn hp(p: vec2f, per: f32) -> f32 { return h31(vec3f(p - per * floor(p / per), per)); }
+fn tn(p: vec2f, per: f32) -> f32 {
+  let i = floor(p); let f = fract(p); let u = f * f * (3. - 2. * f);
+  return mix(mix(hp(i, per), hp(i + vec2f(1., 0.), per), u.x), mix(hp(i + vec2f(0., 1.), per), hp(i + vec2f(1., 1.), per), u.x), u.y);
+}
+fn tf(uv: vec2f, per: f32, n: i32) -> f32 { var a = .5; var s = 0.; var pr = per; for (var i = 0; i < n; i++) { s += a * tn(uv * pr + f32(i) * 7.3, pr); pr *= 2.; a *= .5; } return s / (1. - 2. * a); }
+fn tw(p: vec2f, per: f32) -> vec3f {
+  let i = floor(p); let f = fract(p); var d = vec2f(9.); var id = 0.;
+  for (var x = -1; x <= 1; x++) { for (var y = -1; y <= 1; y++) {
+    let o = vec2f(f32(x), f32(y)); let c = i + o; let cw = c - per * floor(c / per);
+    let hh = h33(vec3f(cw, per)); let r = o + hh.xy - f; let l = dot(r, r);
+    if (l < d.x) { d.y = d.x; d.x = l; id = hh.z; } else if (l < d.y) { d.y = l; }
+  } }
+  return vec3f(sqrt(d), id);
+}
+fn H(uv: vec2f) -> f32 {
+  let wq = uv + .11 * (vec2f(tf(uv, 3., 4), tf(uv + .5, 3., 4)) - .5);
+  let f = tf(wq, 3., 8);
+  let r1 = 1. - abs(tf(wq + 1.7, 5., 6) * 2. - 1.);
+  let cr = min(abs(tf(wq + 4.1, 4., 5) * 2. - 1.) * 7., 1.);
+  let cr2 = min(abs(tf(wq.yx + 2.3, 9., 4) * 2. - 1.) * 9., 1.);
+  let pt = tw(wq * 29., 29.);
+  let pit = (1. - ss(.0, .34, pt.x)) * step(.62, pt.z);
+  return f * .50 + r1 * r1 * .24 + cr * cr2 * .26 - pit * .07;
+}
+@fragment fn fs(@builtin(position) fc: vec4f) -> @location(0) vec4f {
+  let uv = fc.xy / 1024.; let e = 1. / 1024.;
+  let h = H(uv);
+  let gx = H(uv + vec2f(e, 0.)) - H(uv - vec2f(e, 0.)); let gy = H(uv + vec2f(0., e)) - H(uv - vec2f(0., e));
+  let s = clamp(vec2f(gx, gy) * 1024. * .5 * .075, vec2f(-1.), vec2f(1.));
+  return vec4f(-s * .5 + .5, h, tf(uv + 3.7, 3., 5));
+}
+`;
+const mipShader=/* wgsl */`
+@vertex fn vs(@builtin(vertex_index) i:u32)->@builtin(position) vec4f {
+ let xy=vec2f(f32(i32(i&1u)*4-1),f32(i32(i>>1u)*4-1));return vec4f(xy,0.,1.);
+}
+@group(0) @binding(0) var source:texture_2d<f32>;
+@group(0) @binding(1) var filtering:sampler;
+@fragment fn fs(@builtin(position) p:vec4f)->@location(0) vec4f{
+ let uv=p.xy*2./vec2f(textureDimensions(source));
+ return textureSampleLevel(source,filtering,uv,0.);
+}`;
+const shader=/* wgsl */`
+struct Scene { vp: mat4x4f, lightVP: mat4x4f, camera: vec4f, sunlight: vec4f, sky: vec4f, resolution: vec4f };
+@group(0) @binding(0) var<uniform> U: Scene;
+@group(0) @binding(1) var shadowMap: texture_depth_2d;
+@group(0) @binding(2) var shadowSampler: sampler_comparison;
+
+@group(0) @binding(3) var detailTexture:texture_2d<f32>;
+@group(0) @binding(4) var detailSampler:sampler;
+struct Detail { h:f32, c:f32, n:vec3f };
+fn triplanar(p:vec3f,normal:vec3f,s:f32)->Detail{
+ var weight=pow(abs(normalize(normal)),vec3f(4.));
+ weight/=max(weight.x+weight.y+weight.z,.0001);
+ let ax=textureSample(detailTexture,detailSampler,p.zy*s);
+ let ay=textureSample(detailTexture,detailSampler,p.xz*s);
+ let az=textureSample(detailTexture,detailSampler,p.xy*s);
+ var d:Detail;
+ d.h=ax.b*weight.x+ay.b*weight.y+az.b*weight.z;
+ d.c=ax.a*weight.x+ay.a*weight.y+az.a*weight.z;
+ let nx=ax.rg*2.-vec2f(1.);let ny=ay.rg*2.-vec2f(1.);let nz=az.rg*2.-vec2f(1.);
+ d.n=vec3f(0.,nx.y,nx.x)*weight.x+vec3f(ny.x,0.,ny.y)*weight.y+vec3f(nz.x,nz.y,0.)*weight.z;
+ return d;
+}
+
+struct Out { @builtin(position) pos: vec4f, @location(0) wp: vec3f, @location(1) n: vec3f, @location(2) col: vec3f, @location(3) material: f32, @location(4) shadow: vec4f, @location(5) uv: vec2f };
+struct MeshIn { @location(0) pos: vec3f, @location(1) norm: vec3f, @location(2) uv: vec2f, @location(3) tint: vec4f };
+struct InstIn { @location(0) p: vec3f, @location(1) n: vec3f, @location(2) uv: vec2f, @location(3) posMat: vec4f, @location(4) dimYaw: vec4f, @location(5) tint: vec4f };
+@vertex fn vsMesh(v: MeshIn)->Out {var o:Out; o.wp=v.pos;o.n=v.norm;o.col=v.tint.xyz;o.material=v.tint.w;o.pos=U.vp*vec4f(v.pos,1);o.shadow=U.lightVP*vec4f(v.pos,1);o.uv=v.uv;return o;}
+@vertex fn vsInst(v: InstIn)->Out {var o:Out;
+ let co=cos(v.dimYaw.w);let si=sin(v.dimYaw.w);
+ let p=v.p*v.dimYaw.xyz;
+ o.wp=v.posMat.xyz+vec3f(co*p.x+si*p.z,p.y,-si*p.x+co*p.z);
+ var nn=vec3f(co*v.n.x+si*v.n.z,v.n.y,-si*v.n.x+co*v.n.z);
+ if(v.dimYaw.x!=0 && v.dimYaw.y!=0 && v.dimYaw.z!=0){nn=normalize(vec3f(nn.x/v.dimYaw.x,nn.y/v.dimYaw.y,nn.z/v.dimYaw.z));}
+ o.n=nn;o.col=v.tint.xyz;o.material=v.posMat.w;
+ if(o.material==6.){o.wp.x+=sin(U.camera.w*1.4+o.wp.z*1.2+o.wp.y*.7)*.035;o.wp.z+=sin(U.camera.w*1.1+o.wp.x*.8)*.024;}
+ o.pos=U.vp*vec4f(o.wp,1);o.shadow=U.lightVP*vec4f(o.wp,1);o.uv=v.uv;return o;
+}
+@vertex fn vsShMesh(v: MeshIn)->@builtin(position) vec4f{return U.lightVP*vec4f(v.pos,1);}
+@vertex fn vsShInst(v: InstIn)->@builtin(position) vec4f {let co=cos(v.dimYaw.w);let si=sin(v.dimYaw.w);let p=v.p*v.dimYaw.xyz;let w=v.posMat.xyz+vec3f(co*p.x+si*p.z,p.y,-si*p.x+co*p.z);return U.lightVP*vec4f(w,1);}
+fn hash1(n:f32)->f32{return fract(sin(n)*43758.5453);}
+fn hash3(p:vec3f)->f32 {return fract(sin(dot(p,vec3f(127.1,311.7,74.7)))*43758.5453);}
+fn noise(p:vec3f)->f32{let i=floor(p);let f=fract(p);let a=f*f*(3.-2.*f);
+ let x=mix(hash3(i),hash3(i+vec3f(1,0,0)),a.x);
+ let y=mix(hash3(i+vec3f(0,1,0)),hash3(i+vec3f(1,1,0)),a.x);
+ let z=mix(hash3(i+vec3f(0,0,1)),hash3(i+vec3f(1,0,1)),a.x);
+ let w=mix(hash3(i+vec3f(0,1,1)),hash3(i+vec3f(1,1,1)),a.x);
+ return mix(mix(x,y,a.y),mix(z,w,a.y),a.z);
+}
+fn fbm(p:vec3f)->f32{var v=0.;var a=.5;var q=p;for(var i=0;i<4;i++){v+=noise(q)*a;q=q*2.02+vec3f(7.9,19.1,31.7);a*=.5;}return v;}
+
+const SHADOW_RADIUS:i32=__SHADOW_RADIUS__;
+fn sunShadow(i:Out)->f32{
+ let q=i.shadow.xyz/i.shadow.w;
+ let uv=vec2f(q.x*.5+.5,.5-q.y*.5);
+ if(uv.x<0.||uv.x>1.||uv.y<0.||uv.y>1.||q.z<0.||q.z>1.){return 1.;}
+ var a=0.;var wt=0.;let texel=1.4/2048.;
+ for(var x=-2;x<=2;x++){for(var y=-2;y<=2;y++){
+  if(abs(x)>SHADOW_RADIUS||abs(y)>SHADOW_RADIUS){continue;}
+  let o=vec2f(f32(x),f32(y));
+  let w=1./(1.+dot(o,o)*.30);
+  a+=textureSampleCompareLevel(shadowMap,shadowSampler,uv+o*texel,q.z-.0011)*w;
+  wt+=w;
+ }}
+ return a/max(wt,.0001);
+}
+fn lightMaterial(albedo:vec3f,p:vec3f,n:vec3f,mat:f32,shadow:f32,rough:f32)->vec3f{
+ let d=length(U.camera.xyz-p);
+ let L=normalize(U.sunlight.xyz);
+ let V=normalize(U.camera.xyz-p);
+ let N=normalize(n);
+ let sky=max(0.,N.y*.5+.5);
+ let ambient=mix(vec3f(.105,.13,.17),vec3f(.31,.35,.39),sky);
+ let bounce=vec3f(.16,.11,.072)*(1.-sky);
+ let sunlight=vec3f(1.50,1.13,.79)*max(dot(N,L),0.)*shadow*U.sunlight.w;
+ var c=albedo*(ambient+bounce+sunlight);
+ let H=normalize(V+L);
+ let spec=pow(max(dot(N,H),0.),mix(80.,13.,rough))*(1.-rough*.7)*shadow;
+ c+=vec3f(1.05,.86,.62)*spec*.11;
+ if(mat==8.){c+=vec3f(.020,.030,.030);}
+ if(mat==12.){c+=albedo*.09;}
+ // Height fog and sun scattering with cool ambient distance.
+ let lowFog=exp(-max(p.y+2.,0.)*.035);
+ let haze=1.-exp(-max(0.,d-8.)*(.004+.008*lowFog));
+ let air=mix(vec3f(.39,.50,.57),vec3f(.73,.65,.55),clamp((p.y+3.)/45.,0.,1.));
+ let scatter=pow(max(dot(V,-L),0.),10.)*haze;
+ return mix(c,air,min(haze*.70,.64))+vec3f(.31,.21,.105)*scatter*.40;
+}
+@fragment fn fsMain(i:Out)->@location(0) vec4f{
+ let mat=i.material;
+ let dist=length(U.camera.xyz-i.wp);
+ let a=triplanar(i.wp,i.n,.17);
+ let b=triplanar(i.wp+vec3f(17.2,8.4,29.7),i.n,1.40);
+ let grain=a.h*.62+b.h*.38;
+ let mottles=a.c*.72+b.c*.28;
+ var col=i.col;
+ var rough=.91;
+ var bump=.65;
+ if(mat==0.||mat==1.||mat==9.){
+  let strata=.84+.16*sin(i.wp.y*4.8+a.h*4.);
+  col*=vec3f(.96,.91,.82)*(.54+.60*grain+.08*strata);
+  col*=mix(vec3f(.66,.72,.70),vec3f(1.11,1.06,.96),smoothstep(.23,.79,grain));
+  let lichen=smoothstep(.55,.80,mottles)*smoothstep(.38,.65,grain);
+  col=mix(col,col*vec3f(.54,.64,.43),lichen*.31);
+  rough=.94;bump=.86;
+ }else if(mat==2.){
+  col*=vec3f(.90,.83,.74)*(.60+.48*grain);
+  col=mix(col,col*vec3f(.62,.61,.55),smoothstep(.52,.76,mottles)*.12);
+  rough=.97;bump=.38;
+ }else if(mat==3.){
+  let fibres=.84+.16*sin(i.wp.y*38.+a.h*10.);
+  col*=vec3f(.87,.82,.76)*(.57+.46*grain)*fibres;
+  rough=.81;bump=.39;
+ }else if(mat==4.){
+  col*=vec3f(1.04,.82,.69)*(.52+.52*grain);
+  col=mix(col,col*vec3f(.72,.77,.74),smoothstep(.60,.86,mottles)*.14);
+  rough=.88;bump=.65;
+ }else if(mat==5.){
+  col*=vec3f(.92,.91,.84)*(.50+.66*grain)*mix(.68,1.14,smoothstep(.22,.80,grain));
+  let moss=smoothstep(.64,.85,mottles)*smoothstep(.54,.78,grain);
+  col=mix(col,col*vec3f(.51,.63,.42),moss*.30);
+  rough=.98;bump=.91;
+ }else if(mat==6.){
+  col*=vec3f(.84,.99,.81)*(.65+.36*grain);
+  rough=.91;bump=.17;
+ }else if(mat==7.){
+  col*=.49+.42*grain;rough=.40;bump=.10;
+ }else if(mat==8.){
+  col*=.72+.23*grain;rough=.22;bump=.05;
+ }else if(mat==10.||mat==11.){
+  col*=vec3f(.78,.85,.71)*(.54+.61*grain);
+  rough=.94;bump=.69;
+ }else{
+  col*=.63+.44*grain;rough=.87;bump=.25;
+ }
+ let influence=bump*mix(1.14,.16,smoothstep(8.,70.,dist));
+ let normal=normalize(normalize(i.n)+(a.n*.74+b.n*.26)*influence);
+ return vec4f(lightMaterial(col,i.wp,normal,mat,sunShadow(i),rough),1.);
+}
+@vertex fn vsFull(@builtin(vertex_index) i:u32)->@builtin(position) vec4f{
+ let xy=vec2f(f32(i32(i&1u)*4-1),f32(i32(i>>1u)*4-1));return vec4f(xy,.9999,1.);
+}
+@fragment fn fsSky(@builtin(position) q:vec4f)->@location(0) vec4f{
+ let uv=q.xy/U.resolution.xy;let a=clamp(uv.y,0.,1.);
+ var color=mix(vec3f(.59,.51,.43),vec3f(.21,.34,.48),smoothstep(.22,.97,1.-a));
+ let streaks=fbm(vec3f(uv.x*3.5,a*4.,U.camera.w*.004));
+ let horizon=smoothstep(.55,.82,a);
+ color=mix(color,vec3f(.73,.64,.52),horizon*.23);
+ let glimmer=exp(-length((uv-vec2f(.12,.30))*vec2f(1.,1.8))*6.);
+ color+=vec3f(.32,.22,.11)*glimmer*.18;
+ let cloud=pow(max(0.,streaks-.43),1.5)*.35;
+ color=mix(color,color+vec3f(.30,.27,.23),cloud);
+ return vec4f(color,1.);
+}
+`;
+const postShader=/* wgsl */`
+struct Post{res:vec4f,exposure:vec4f};
+@group(0) @binding(0) var img:texture_2d<f32>;
+@group(0) @binding(1) var smp:sampler;
+@group(0) @binding(2) var<uniform> P:Post;
+@vertex fn vs(@builtin(vertex_index) idx:u32)->@builtin(position) vec4f{
+ let xy=vec2f(f32(i32(idx&1u)*4-1),f32(i32(idx>>1u)*4-1));return vec4f(xy,0,1);
+}
+fn aces(x:vec3f)->vec3f{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),vec3f(0.),vec3f(1.));}
+fn lum(x:vec3f)->f32{return dot(x,vec3f(.2126,.7152,.0722));}
+@fragment fn fs(@builtin(position) fc:vec4f)->@location(0) vec4f{
+ let uv=fc.xy*P.res.zw;
+ var c=textureSample(img,smp,uv).rgb;
+ var bloom=vec3f(0.);var wt=0.;
+ for(var i=-2;i<=2;i++){
+  for(var j=-2;j<=2;j++){
+   if(abs(i)==2&&abs(j)==2){continue;}
+   let p=vec2f(f32(i),f32(j));
+   let q=textureSample(img,smp,clamp(uv+p*P.res.zw*3.,vec2f(0.),vec2f(1.))).rgb;
+   let w=1./(1.+dot(p,p)*.42);
+   bloom+=q*max(lum(q)-.91,0.)*w;wt+=w;
+  }
+ }
+ c+=bloom/max(wt,.0001)*.11;
+ c=aces(max(c,vec3f(0.))*P.exposure.x);
+ let l=lum(c);
+ c*=mix(vec3f(1.002,1.03,1.055),vec3f(1.023,.996,.956),smoothstep(.23,.85,l));
+ c+=vec3f(-.006,.003,.009)*(1.-smoothstep(.12,.60,l));
+ if(P.exposure.y>.5){
+   let n=textureSample(img,smp,clamp(uv+vec2f(0.,P.res.w*1.5),vec2f(0.),vec2f(1.))).rgb;
+   let e=textureSample(img,smp,clamp(uv+vec2f(P.res.z*1.5,0.),vec2f(0.),vec2f(1.))).rgb;
+   let m=aces(max((n+e)*.5,vec3f(0.))*P.exposure.x);
+   c=clamp(c+(c-m)*.10,vec3f(0.),vec3f(1.));
+ }
+ c*=1.-.17*pow(length((uv-.5)*vec2f(1.,1.12)),1.8);
+ c=pow(clamp(c,vec3f(0.),vec3f(1.)),vec3f(1./2.2));
+ let d=fract(sin(dot(fc.xy,vec2f(12.9898,78.233)))*43758.5453)-.5;
+ return vec4f(clamp(c+d/420.,vec3f(0.),vec3f(1.)),1.);
+}
+`;
+
+async function main(){
+ if(!navigator.gpu)throw Error('WebGPU non disponibile. Prova Chrome o Edge aggiornato con accelerazione hardware attiva.');
+ const adapter=await navigator.gpu.requestAdapter({powerPreference:'high-performance'});
+ if(!adapter)throw Error('Nessun adattatore WebGPU trovato sul dispositivo.');
+ const dev=await adapter.requestDevice(),q=dev.queue;
+ dev.addEventListener('uncapturederror',e=>{console.error('[Thais WebGPU]',e.error);status.textContent='Errore GPU: '+e.error.message.slice(0,120)});
+ dev.lost.then(e=>{status.textContent='Dispositivo GPU perso: '+e.message});
+ const canvas=document.createElement('canvas');$('stage').appendChild(canvas);
+ const ctx=canvas.getContext('webgpu');const format=navigator.gpu.getPreferredCanvasFormat();
+ const BU=GPUBufferUsage,TU=GPUTextureUsage;
+ const buffer=(data,usage)=>{const b=dev.createBuffer({size:(data.byteLength+3)&~3,usage:usage|BU.COPY_DST});q.writeBuffer(b,0,data);return b};
+ const cube=[];
+ function face(ax,a,ay,b,az,c,n){const p=(x,y)=>{let v=[0,0,0];v[ax]=a;v[ay]=x;v[az]=y;return v};const pts=[p(-.5,-.5),p(.5,-.5),p(.5,.5),p(-.5,.5)];const normal=[0,0,0];normal[ax]=n;for(const i of [0,1,2,0,2,3])cube.push(...pts[i],...normal,0,0)}
+ face(0,-.5,1,0,2,0,-1);face(0,.5,1,0,2,0,1);face(1,.5,2,0,0,0,1);face(1,-.5,2,0,0,0,-1);face(2,.5,0,0,1,0,1);face(2,-.5,0,0,1,0,-1);
+ // Reusable, crossed, leaf-shaped cards: four triangles per cluster instead of
+// twelve sharp-edged cube triangles. Rotation and wind remain GPU-instanced.
+ const leafBase=[];
+ for(const a of [0,Math.PI/2]){
+   const co=Math.cos(a),si=Math.sin(a);
+   const points=[[0,-.5,0],[-.48,-.08,.04],[0,.5,.14],[.48,-.08,.04]];
+   const indices=[0,1,2,0,2,3];
+   const normal=[si,.22,co];
+   for(const idx of indices){
+     const [px,py,pz]=points[idx];
+     leafBase.push(co*px+si*pz,py,-si*px+co*pz,...normal,0,0);
+   }
+ }
+ const meshArr=new Float32Array(mesh),cubeArr=new Float32Array(cube),leafArr=new Float32Array(leafBase);
+ const bMesh=buffer(meshArr,BU.VERTEX),bCube=buffer(cubeArr,BU.VERTEX),bLeaf=buffer(leafArr,BU.VERTEX),bBox=buffer(new Float32Array(boxes),BU.VERTEX),bPavers=buffer(new Float32Array(pavers),BU.VERTEX),bLeaves=buffer(new Float32Array(leaves),BU.VERTEX);
+ status.textContent='Compilazione shader e illuminazione WebGPU…';bar.style.width='72%';
+ const detailDim=touch?512:1024;
+ const detailMips=Math.floor(Math.log2(detailDim))+1;
+ const detailSource=detailShader.replaceAll('1024.',String(detailDim)+'.');
+ const module=dev.createShaderModule({code:shader.replace('__SHADOW_RADIUS__',touch?'1':'2')}),postMod=dev.createShaderModule({code:postShader}),
+       detailModule=dev.createShaderModule({code:detailSource}),mipModule=dev.createShaderModule({code:mipShader});
+ for(const [name,mod] of [['scene',module],['post',postMod],['stone detail',detailModule],['stone mipmaps',mipModule]]){
+   const info=await mod.getCompilationInfo();let errors=info.messages.filter(x=>x.type==='error');if(errors.length)throw Error(name+' WGSL: '+errors.map(x=>x.message+' line '+x.lineNum).join('; ').slice(0,300));
+ }
+ // Texture bake follows Abyssal Garden: generate slopes, height and mottling once on GPU.
+ status.textContent='Generazione materiali della Lunigiana…';bar.style.width='77%';
+ const detailTexture=dev.createTexture({size:[detailDim,detailDim],format:'rgba8unorm',mipLevelCount:detailMips,usage:TU.RENDER_ATTACHMENT|TU.TEXTURE_BINDING});
+ const detailSampler=dev.createSampler({addressModeU:'repeat',addressModeV:'repeat',magFilter:'linear',minFilter:'linear',mipmapFilter:'linear'});
+ const bakePipe=dev.createRenderPipeline({layout:'auto',vertex:{module:detailModule,entryPoint:'vs'},fragment:{module:detailModule,entryPoint:'fs',targets:[{format:'rgba8unorm'}]}});
+ const mipPipe=dev.createRenderPipeline({layout:'auto',vertex:{module:mipModule,entryPoint:'vs'},fragment:{module:mipModule,entryPoint:'fs',targets:[{format:'rgba8unorm'}]}});
+ const encoderDetail=dev.createCommandEncoder();
+ let passDetail=encoderDetail.beginRenderPass({colorAttachments:[{view:detailTexture.createView({baseMipLevel:0,mipLevelCount:1}),loadOp:'clear',storeOp:'store',clearValue:[0,0,0,1]}]});
+ passDetail.setPipeline(bakePipe);passDetail.draw(3);passDetail.end();
+ for(let level=1;level<detailMips;level++){
+  const prevView=detailTexture.createView({baseMipLevel:level-1,mipLevelCount:1});
+  const nextView=detailTexture.createView({baseMipLevel:level,mipLevelCount:1});
+  const bg=dev.createBindGroup({layout:mipPipe.getBindGroupLayout(0),entries:[{binding:0,resource:prevView},{binding:1,resource:detailSampler}]});
+  const pass=encoderDetail.beginRenderPass({colorAttachments:[{view:nextView,loadOp:'clear',storeOp:'store',clearValue:[0,0,0,1]}]});
+  pass.setPipeline(mipPipe);pass.setBindGroup(0,bg);pass.draw(3);pass.end();
+ }
+ q.submit([encoderDetail.finish()]);
+ const stageLayout=dev.createBindGroupLayout({entries:[
+  {binding:0,visibility:GPUShaderStage.VERTEX|GPUShaderStage.FRAGMENT,buffer:{}},
+  {binding:1,visibility:GPUShaderStage.FRAGMENT,texture:{sampleType:'depth'}},
+  {binding:2,visibility:GPUShaderStage.FRAGMENT,sampler:{type:'comparison'}},
+  {binding:3,visibility:GPUShaderStage.FRAGMENT,texture:{}},
+  {binding:4,visibility:GPUShaderStage.FRAGMENT,sampler:{}}
+ ]}),stagePL=dev.createPipelineLayout({bindGroupLayouts:[stageLayout]});
+ const bCamera=dev.createBuffer({size:192,usage:BU.UNIFORM|BU.COPY_DST});
+ const shadowLayout=dev.createBindGroupLayout({entries:[{binding:0,visibility:GPUShaderStage.VERTEX,buffer:{}}]});
+ const shadowPL=dev.createPipelineLayout({bindGroupLayouts:[shadowLayout]});
+ const shadowBG=dev.createBindGroup({layout:shadowLayout,entries:[{binding:0,resource:{buffer:bCamera}}]});
+ const shadowSize=touch?1024:2048;
+ const texShadow=dev.createTexture({size:[shadowSize,shadowSize],format:'depth32float',usage:TU.RENDER_ATTACHMENT|TU.TEXTURE_BINDING});
+ const shadowView=texShadow.createView();
+ const compare=dev.createSampler({compare:'less-equal',magFilter:'linear',minFilter:'linear'});
+ const stageBG=dev.createBindGroup({layout:stageLayout,entries:[{binding:0,resource:{buffer:bCamera}},{binding:1,resource:shadowView},{binding:2,resource:compare},{binding:3,resource:detailTexture.createView()},{binding:4,resource:detailSampler}]});
+ const vbCube={arrayStride:32,attributes:[{shaderLocation:0,offset:0,format:'float32x3'},{shaderLocation:1,offset:12,format:'float32x3'},{shaderLocation:2,offset:24,format:'float32x2'}]};
+ const vbInstance={arrayStride:48,stepMode:'instance',attributes:[{shaderLocation:3,offset:0,format:'float32x4'},{shaderLocation:4,offset:16,format:'float32x4'},{shaderLocation:5,offset:32,format:'float32x4'}]};
+ const vbMesh={arrayStride:48,attributes:[{shaderLocation:0,offset:0,format:'float32x3'},{shaderLocation:1,offset:12,format:'float32x3'},{shaderLocation:2,offset:24,format:'float32x2'},{shaderLocation:3,offset:32,format:'float32x4'}]};
+ const makePipe=(entry,fragment=true,meshMode=false,shadow=false)=>dev.createRenderPipeline({layout:shadow?shadowPL:stagePL,
+  vertex:{module,entryPoint:entry,buffers:meshMode?[vbMesh]:[vbCube,vbInstance]},
+  ...(fragment?{fragment:{module,entryPoint:'fsMain',targets:[{format:'rgba16float'}]}}:{}),
+  primitive:{topology:'triangle-list',cullMode:'none'},
+  depthStencil:{format:shadow?'depth32float':'depth24plus',depthWriteEnabled:true,depthCompare:'less'}
+ });
+ const sceneMesh=makePipe('vsMesh',true,true),sceneInst=makePipe('vsInst'),shMesh=makePipe('vsShMesh',false,true,true),shInst=makePipe('vsShInst',false,false,true);
+ const skyPipe=dev.createRenderPipeline({layout:stagePL,vertex:{module,entryPoint:'vsFull'},fragment:{module,entryPoint:'fsSky',targets:[{format:'rgba16float'}]},primitive:{topology:'triangle-list'},depthStencil:{format:'depth24plus',depthWriteEnabled:false,depthCompare:'less-equal'}});
+ let colorTarget,depthTarget,postBG,lastW=0,lastH=0;
+ const smp=dev.createSampler({magFilter:'linear',minFilter:'linear',addressModeU:'clamp-to-edge',addressModeV:'clamp-to-edge'});
+ const postLayout=dev.createBindGroupLayout({entries:[{binding:0,visibility:GPUShaderStage.FRAGMENT,texture:{sampleType:'float'}},{binding:1,visibility:GPUShaderStage.FRAGMENT,sampler:{}},{binding:2,visibility:GPUShaderStage.FRAGMENT,buffer:{}}]});
+ const bPost=dev.createBuffer({size:32,usage:BU.UNIFORM|BU.COPY_DST});
+ const postPipe=dev.createRenderPipeline({layout:dev.createPipelineLayout({bindGroupLayouts:[postLayout]}),vertex:{module:postMod,entryPoint:'vs'},fragment:{module:postMod,entryPoint:'fs',targets:[{format}]},primitive:{topology:'triangle-list'}});
+ let low=touch;let pixels=0;
+ function resize(){const dpr=Math.min(devicePixelRatio||1,low?1:1.4),w=Math.max(2,Math.round(canvas.clientWidth*dpr/2)*2),h=Math.max(2,Math.round(canvas.clientHeight*dpr/2)*2);if(w===lastW&&h===lastH)return;
+   lastW=w;lastH=h;canvas.width=w;canvas.height=h;ctx.configure({device:dev,format,alphaMode:'opaque'});
+   colorTarget?.destroy();depthTarget?.destroy();
+   colorTarget=dev.createTexture({size:[w,h],format:'rgba16float',usage:TU.RENDER_ATTACHMENT|TU.TEXTURE_BINDING});
+   depthTarget=dev.createTexture({size:[w,h],format:'depth24plus',usage:TU.RENDER_ATTACHMENT});
+   postBG=dev.createBindGroup({layout:postLayout,entries:[{binding:0,resource:colorTarget.createView()},{binding:1,resource:smp},{binding:2,resource:{buffer:bPost}}]});
+   q.writeBuffer(bPost,0,new Float32Array([w,h,1/w,1/h,0.96,low?0:1,0,0]));pixels=w*h;
+ }
+ const camera={x:bends(24),y:targetRoad(24)+1.72,z:24,yaw:0,pitch:.015};
+ const light=[-.58,.79,-.42];const sunPos=[-38,66,-55],look=[0,2,-13];
+ const lightVP=matrixMul(ortho(-76,76,-74,74,1,190),lookAt(sunPos,look,[0,1,0]));
+ const udata=new Float32Array(48);
+ udata.set(lightVP,16);udata.set([light[0],light[1],light[2],1.0],36);
+ const keys=new Set();let running=false,opened=true,dx=0,dy=0,yawInput=0,joy=[0,0],last=performance.now(),frameCount=0,tsCount=0,fps=0;
+ function makeMenu(on){opened=on;running=!on;$('overlay').classList.toggle('hide',!on);$('hud').style.display=on?'none':'block';$('top').querySelectorAll('button').forEach(b=>b.style.display=on?'none':'block');$('reticle').style.display=on?'none':'block';$('touch').style.display=!on&&touch?'block':'none';if(on&&document.pointerLockElement)document.exitPointerLock();}
+ function capture(){if(!touch)canvas.requestPointerLock?.().catch(()=>{});}
+ $('start').addEventListener('click',()=>{makeMenu(false);capture()});
+ $('menu').addEventListener('click',()=>makeMenu(true));
+ $('quality').addEventListener('click',()=>{low=!low;$('quality').textContent=low?'Qualità: Mobile':'Qualità: Alta';lastW=0;resize()});
+ window.addEventListener('keydown',e=>{if(e.code==='Escape'){makeMenu(true);return;}keys.add(e.code);if(!opened&&['Space','KeyW','KeyA','KeyS','KeyD','ShiftLeft','KeyE','KeyQ'].includes(e.code))e.preventDefault()});
+ window.addEventListener('keyup',e=>keys.delete(e.code));
+ window.addEventListener('blur',()=>{keys.clear();makeMenu(true)});
+ document.addEventListener('pointerlockchange',()=>{if(!document.pointerLockElement&&!touch&&!opened)makeMenu(true)});
+ window.addEventListener('mousemove',e=>{if(document.pointerLockElement===canvas){dx+=e.movementX;dy+=e.movementY}});
+ canvas.addEventListener('click',()=>{if(!opened&&!touch&&!document.pointerLockElement)capture()});
+ if(touch){
+   const joyEl=$('stick'),nub=$('nub');let active=-1;
+   joyEl.addEventListener('pointerdown',e=>{active=e.pointerId;joyEl.setPointerCapture(e.pointerId);e.preventDefault()});
+   joyEl.addEventListener('pointermove',e=>{if(e.pointerId!==active)return;let r=joyEl.getBoundingClientRect(),x=clamp((e.clientX-r.left-r.width/2)/(r.width*.32),-1,1),y=clamp((e.clientY-r.top-r.height/2)/(r.height*.32),-1,1);joy=[x,y];nub.style.transform=`translate(${x*36}px,${y*36}px)`});
+   const lift=e=>{if(e.pointerId!==active)return;active=-1;joy=[0,0];nub.style.transform=''};
+   joyEl.addEventListener('pointerup',lift);joyEl.addEventListener('pointercancel',lift);
+   let touchId=-1,px=0,py=0;
+   canvas.addEventListener('pointerdown',e=>{touchId=e.pointerId;px=e.clientX;py=e.clientY;canvas.setPointerCapture(e.pointerId)});
+   canvas.addEventListener('pointermove',e=>{if(e.pointerId!==touchId||opened)return;dx+=(e.clientX-px)*1.5;dy+=(e.clientY-py)*1.5;px=e.clientX;py=e.clientY});
+   canvas.addEventListener('pointerup',e=>{if(e.pointerId===touchId)touchId=-1});
+ }
+ function move(dt){if(!running)return;camera.yaw+=dx*.0021;camera.pitch=clamp(camera.pitch-dy*.0019,-.76,.75);dx=dy=0;
+  const fw=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0)-(joy[1]||0),st=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0)+(joy[0]||0);
+  const magnitude=Math.min(1,Math.hypot(fw,st));if(magnitude>.01){let speed=keys.has('ShiftLeft')?7:3.6;const f=fw/(Math.hypot(fw,st)||1),s=st/(Math.hypot(fw,st)||1);
+   let x=camera.x+(Math.sin(camera.yaw)*f+Math.cos(camera.yaw)*s)*speed*dt*magnitude;
+   let z=camera.z+(-Math.cos(camera.yaw)*f+Math.sin(camera.yaw)*s)*speed*dt*magnitude;
+   z=clamp(z,-38,27);
+   // Il cortile si apre a sinistra tra z=-20.6 e z=-14.4.
+   const courtyardBlend=smooth(clamp((z+21.0)/2.4,0,1))*smooth(clamp((-z-13.5)/2.4,0,1));
+   const minX=bends(z)-3.17-7.0*courtyardBlend;
+   x=clamp(x,minX,bends(z)+3.17);
+   camera.x=x;camera.z=z;
+  }
+  let y=targetRoad(camera.z)+1.71;camera.y=mix(camera.y,y,1-Math.exp(-dt*8));
+ }
+ function draw(ctime){resize();let dt=Math.min(.033,(ctime-last)/1000);last=ctime;move(dt);
+  const view=lookAt([camera.x,camera.y,camera.z], [camera.x+Math.sin(camera.yaw)*Math.cos(camera.pitch),camera.y+Math.sin(camera.pitch),camera.z-Math.cos(camera.yaw)*Math.cos(camera.pitch)],[0,1,0]);
+  const vp=matrixMul(persp(touch?Math.PI*.41:Math.PI*.35,lastW/lastH,.12,250),view);udata.set(vp,0);udata.set([camera.x,camera.y,camera.z,ctime*.001],32);udata.set([.72,.81,.78,1],40);udata.set([lastW,lastH,1/lastW,1/lastH],44);q.writeBuffer(bCamera,0,udata);
+  const encoder=dev.createCommandEncoder();let pass=encoder.beginRenderPass({colorAttachments:[],depthStencilAttachment:{view:shadowView,depthLoadOp:'clear',depthStoreOp:'store',depthClearValue:1}});
+  pass.setBindGroup(0,shadowBG);pass.setPipeline(shMesh);pass.setVertexBuffer(0,bMesh);pass.draw(meshArr.length/12);pass.setPipeline(shInst);pass.setVertexBuffer(0,bCube);pass.setVertexBuffer(1,bBox);pass.draw(cubeArr.length/8,boxes.length/12);pass.setVertexBuffer(1,bPavers);pass.draw(cubeArr.length/8,pavers.length/12);pass.end();
+  pass=encoder.beginRenderPass({colorAttachments:[{view:colorTarget.createView(),loadOp:'clear',storeOp:'store',clearValue:{r:.37,g:.54,b:.58,a:1}}],depthStencilAttachment:{view:depthTarget.createView(),depthLoadOp:'clear',depthStoreOp:'store',depthClearValue:1}});
+  pass.setBindGroup(0,stageBG);
+  pass.setPipeline(skyPipe);pass.draw(3);
+  pass.setPipeline(sceneMesh);pass.setVertexBuffer(0,bMesh);pass.draw(meshArr.length/12);
+  pass.setPipeline(sceneInst);pass.setVertexBuffer(0,bCube);pass.setVertexBuffer(1,bBox);pass.draw(cubeArr.length/8,boxes.length/12);
+  pass.setVertexBuffer(1,bPavers);pass.draw(cubeArr.length/8,pavers.length/12);
+  pass.setVertexBuffer(0,bLeaf);pass.setVertexBuffer(1,bLeaves);pass.draw(leafArr.length/8,leaves.length/12);
+  pass.end();
+  pass=encoder.beginRenderPass({colorAttachments:[{view:ctx.getCurrentTexture().createView(),loadOp:'clear',storeOp:'store'}]});pass.setPipeline(postPipe);pass.setBindGroup(0,postBG);pass.draw(3);pass.end();
+  q.submit([encoder.finish()]);
+  frameCount++;if(ctime-tsCount>1100){fps=Math.round(frameCount*1000/(ctime-tsCount||1));frameCount=0;tsCount=ctime;$('stats').textContent=`WebGPU · ${fps} fps · ${boxes.length/12|0} dettagli · ${(pixels/1e6).toFixed(1)} Mpx`;}
+  requestAnimationFrame(draw);
+ }
+ status.textContent='P07 · Abyssal Light · WebGPU nativo';bar.style.width='100%';setTimeout(()=>bar.style.opacity='0',600);
+ $('quality').textContent=low?'Qualità: Mobile':'Qualità: Alta';
+ requestAnimationFrame(draw);
+}
+main().catch(err=>{console.error(err);status.textContent='Errore WebGPU';const box=$('failure');box.style.display='block';box.textContent='Il borgo WebGPU non si è avviato: '+(err?.message||err);});
+
+</script>
+</body>
+</html>
