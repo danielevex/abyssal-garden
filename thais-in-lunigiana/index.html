@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14282c">
+<title>Thais in Lunigiana — Verrucola, prototipo procedurale</title>
+<style>
+:root{color-scheme:dark;--cream:#f8efd9;--glass:rgba(16,34,38,.83);--edge:rgba(244,222,166,.33);--gold:#e6bd75}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#91adac;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--cream)}#stage{position:absolute;inset:0}canvas{display:block;width:100%;height:100%;touch-action:none}#vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 51% 43%,transparent 39%,rgba(13,27,31,.17) 81%,rgba(13,27,31,.52) 125%)}#brand{position:absolute;left:clamp(15px,2.6vw,45px);top:clamp(15px,3vw,40px);letter-spacing:.25em;text-transform:uppercase;text-shadow:0 2px 14px #15303299;pointer-events:none}#brand b{font:700 clamp(17px,1.8vw,26px) Georgia,serif;letter-spacing:.03em;text-transform:none}#brand small{display:block;font-size:9px;color:#f0d8a6;letter-spacing:.32em;margin-bottom:5px}#hud{position:absolute;left:clamp(15px,2.6vw,45px);bottom:clamp(13px,2.4vw,35px);display:none;background:var(--glass);border:1px solid var(--edge);backdrop-filter:blur(14px);border-radius:14px;padding:11px 15px;max-width:360px;box-shadow:0 16px 50px #0d25233d}#hud .heading{font:700 16px Georgia,serif;color:#f2d29b}#hud .hint{font-size:11px;opacity:.8;margin-top:4px;line-height:1.5}#hud .stats{font:11px ui-monospace,Consolas,monospace;margin-top:5px;color:#ade7cf}#top-right{position:absolute;top:clamp(12px,2vw,32px);right:clamp(12px,2vw,32px);display:flex;gap:8px;z-index:5}button{cursor:pointer;border:1px solid var(--edge);color:var(--cream);background:rgba(21,44,45,.83);border-radius:10px;padding:11px 14px;font-weight:680;letter-spacing:.02em;box-shadow:0 4px 16px #0016}button:hover{background:rgba(44,74,69,.95)}#top-right button{font-size:13px;display:none}#intro{position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(90deg,rgba(4,26,30,.71),rgba(7,35,37,.38) 54%,rgba(8,30,35,.25));transition:opacity .65s,visibility .65s;z-index:4;padding:20px}#intro.hide{opacity:0;visibility:hidden;pointer-events:none}#panel{width:min(590px,100%);margin-right:auto;margin-left:clamp(0px,5vw,120px);text-shadow:0 3px 18px #092e35b0}#panel .eyebrow{font-size:11px;letter-spacing:.29em;text-transform:uppercase;color:#e6d3ab;font-weight:750}#panel h1{font:normal clamp(56px,8vw,113px)/.85 Georgia,'Times New Roman',serif;letter-spacing:-.055em;margin:16px 0 10px}#panel h1 i{font-style:italic;color:#f1d5a3}#panel h2{font:normal clamp(19px,2vw,28px) Georgia,serif;color:#e9cfaa;letter-spacing:.04em;margin:18px 0}#panel p{font-size:clamp(13px,1.16vw,16px);line-height:1.65;max-width:490px;color:#f3f1dfde}#start{background:linear-gradient(135deg,#eac98e,#d7a763);border:1px solid #ffecc7;color:#26362f;text-shadow:none;font-size:14px;letter-spacing:.07em;text-transform:uppercase;margin-top:19px;padding:16px 25px}#smallnote{font-size:11px;line-height:1.7;opacity:.74;margin-top:15px;max-width:460px}#status{position:absolute;bottom:15px;right:20px;font:11px ui-monospace,monospace;color:#f1eee2c7;pointer-events:none}#error{display:none;position:absolute;inset:15% 8%;margin:auto;height:max-content;background:#142528e8;border:1px solid #e8c188;padding:30px;border-radius:18px;z-index:10;line-height:1.7}#touch{display:none;position:absolute;inset:0;pointer-events:none;z-index:3}#joy{position:absolute;left:7vw;bottom:12vh;width:120px;height:120px;border:2px solid #f9ecc16e;border-radius:50%;background:#143f426e;pointer-events:auto;touch-action:none}#nub{position:absolute;left:41px;top:41px;width:36px;height:36px;border-radius:50%;background:#efdaae;box-shadow:0 2px 8px #0006}#touchlabel{position:absolute;right:7vw;bottom:17vh;font-size:12px;background:#173e427a;padding:10px;border:1px solid #f6e4b65c;border-radius:8px}#reticle{display:none;position:absolute;left:50%;top:52%;width:6px;height:6px;transform:translate(-50%,-50%);border:1px solid #ffecc888;border-radius:50%;pointer-events:none}#seal{position:absolute;right:clamp(15px,3vw,47px);bottom:clamp(15px,3vw,45px);text-align:right;pointer-events:none;color:#f8e5bdad;font:italic 13px Georgia,serif;text-shadow:0 2px 8px #08252ca8}#seal strong{font-size:19px;letter-spacing:.07em;display:block;color:#f6e6c7}@media(max-width:680px){#intro{background:#092f35aa}#panel{margin-left:0}#panel h1{font-size:58px}#seal{display:none}#brand{display:none}#hud{left:auto;right:15px;bottom:12px;max-width:200px}.hint{display:none}#touchlabel{font-size:10px}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js"}}</script>
+</head>
+<body>
+<div id="stage"></div><div id="vignette"></div>
+<div id="brand"><small>Cozy Paw Worlds · Prototipo 01</small><b>Thais in Lunigiana</b></div>
+<div id="top-right"><button id="quality" type="button">Dettaglio: Alto</button><button id="menuButton" type="button">☰ Menu</button></div>
+<div id="hud"><div class="heading">La strada del Castello</div><div class="hint">WASD: cammina · Mouse: guarda · Shift: corri · Esc: menu<br>Qui nasceranno le avventure di Thais.</div><div class="stats" id="stats">Procedurale · — fps</div></div>
+<div id="seal"><strong>Verrucola</strong>ispirato alla Lunigiana, Toscana</div>
+<div id="touch"><div id="joy"><div id="nub"></div></div><div id="touchlabel">Trascina qui per guardarti attorno ↗</div></div>
+<div id="reticle"></div>
+<div id="intro"><div id="panel"><div class="eyebrow">Una nuova avventura di Cozy Paw Studio</div><h1>Thais <i>in</i><br>Lunigiana</h1><h2>La strada del Castello</h2><p>Un piccolo borgo di pietra prende vita fra i castagneti e le colline. Ogni casa, tetto, vicolo e ciottolo nasce da regole procedurali, ispirate ai borghi della Lunigiana.</p><button id="start" type="button">✦ Esplora il borgo</button><div id="smallnote">Prima passeggiata esplorativa. È un luogo originale ispirato a Verrucola, non una riproduzione topografica fedele. Thais giocabile e missioni arriveranno nelle prossime fasi.</div></div></div>
+<div id="status">Preparazione del borgo…</div>
+<div id="error" role="alert"></div>
+<script type="module">
+/* Thais in Lunigiana: procedurally assembled Verrucola-inspired medieval street.
+   Entire geometry and material maps are code-generated. Renderer: Three.js WebGL2.
+   This is a standalone prototype; it does not change the original Abyssal Garden source.
+   MIT notice for original Abyssal Garden applies to the parent repository.
+*/
+import * as THREE from 'three';
+const $ = id=>document.getElementById(id);
+const status = $('status');
+const isTouch = matchMedia('(pointer:coarse)').matches;
+let mobile = isTouch;
+let high = !mobile;
+let seed=20261118;
+function rand(){seed|=0;seed=(seed+0x6D2B79F5)|0;let t=Math.imul(seed^(seed>>>15),1|seed);t=(t+Math.imul(t^(t>>>7),61|t))^t;return ((t^(t>>>14))>>>0)/4294967296;}
+const rr=(a,b)=>a+(b-a)*rand();
+const pick=a=>a[Math.floor(rand()*a.length)];
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const smooth=t=>t*t*(3-2*t);
+const hash=(x,z)=>{let n=Math.sin(x*127.1+z*311.7)*43758.5453123;return n-Math.floor(n)};
+function noise(x,z){let a=Math.floor(x),b=Math.floor(z),u=smooth(x-a),v=smooth(z-b);return lerp(lerp(hash(a,b),hash(a+1,b),u),lerp(hash(a,b+1),hash(a+1,b+1),u),v)}
+function fbm(x,z){let s=0,amp=.5;for(let i=0;i<5;i++){s+=noise(x,z)*amp;x=x*2.07+31;z=z*2.05+17;amp*=.5}return s}
+function curve(z){return Math.sin(z*.043)*.8+Math.sin(z*.09)*.22;}
+function roadY(z){return (34-z)*.048 + .13*Math.sin(z*.13);}
+function landY(x,z){let a=Math.abs(x);const valley=roadY(z)-.075;const ramp=smooth(clamp((a-12)/37,0,1));return valley+ramp*(4+11*fbm(x*.025,z*.025))+.8*fbm(x*.04,z*.04)*ramp;}
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x96b7b6);
+scene.fog=new THREE.FogExp2(0x9fb7b2,mobile?.0125:.0105);
+const camera=new THREE.PerspectiveCamera(mobile?74:68,1,.08,330);
+const renderer=new THREE.WebGLRenderer({antialias:!mobile,alpha:false,powerPreference:'high-performance'});
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.16;
+renderer.shadowMap.enabled=high;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.setPixelRatio(Math.min(devicePixelRatio,mobile?1.15:1.7));
+$('stage').appendChild(renderer.domElement);
+const sun=new THREE.DirectionalLight(0xffedc9,3.4);
+sun.position.set(-34,62,-55);
+sun.castShadow=high;
+sun.shadow.mapSize.set(2048,2048);
+sun.shadow.camera.left=-65;sun.shadow.camera.right=65;sun.shadow.camera.top=80;sun.shadow.camera.bottom=-80;
+sun.shadow.camera.near=1;sun.shadow.camera.far=220;
+sun.shadow.bias=-.00018;
+sun.target.position.set(0,0,-28);scene.add(sun,sun.target);
+const hemi=new THREE.HemisphereLight(0xcce7ee,0x71654e,2.25);scene.add(hemi);
+scene.add(new THREE.AmbientLight(0xffeac6,.15));
+
+// Sky shader: daylit blue above a warm Tuscan horizon.
+const sky = new THREE.Mesh(new THREE.SphereGeometry(300,32,20),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,uniforms:{},vertexShader:`varying vec3 v;void main(){v=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,fragmentShader:`varying vec3 v;void main(){float h=normalize(v).y;vec3 horizon=vec3(.80,.80,.71);vec3 zenith=vec3(.27,.54,.68);vec3 low=vec3(.91,.79,.59);vec3 c=mix(low,horizon,smoothstep(-.2,.09,h));c=mix(c,zenith,smoothstep(-.03,.72,h));gl_FragColor=vec4(c,1.);}` }));scene.add(sky);
+
+// Procedurally painted material maps (repeatable, no external image files).
+function makeCanvasMap(type,res=512){
+ const c=document.createElement('canvas');c.width=c.height=res;const g=c.getContext('2d');
+ const id=g.createImageData(res,res);let d=id.data;
+ for(let y=0;y<res;y++)for(let x=0;x<res;x++){
+  const o=(y*res+x)*4,q=(rand()-.5)*28,grain=fbm(x*.07,y*.07)*31;
+  let r,gc,b;
+  if(type==='stone'){r=141;gc=136;b=118}else if(type==='cobble'){r=129;gc=128;b=113}else if(type==='roof'){r=171;gc=92;b=55}else if(type==='wood'){r=99;gc=64;b=42}else{r=98;gc=101;b=75}
+  d[o]=clamp(r+q+grain,0,255);d[o+1]=clamp(gc+q+grain,0,255);d[o+2]=clamp(b+q+grain,0,255);d[o+3]=255;
+ }g.putImageData(id,0,0);
+ if(type==='stone'||type==='cobble'){
+  const step=type==='stone'?47:37;
+  for(let row=0;row<Math.ceil(res/step)+1;row++){
+   const y=row*step+rr(-3,3),offset=row%2?step*.48:0;
+   for(let col=-1;col<Math.ceil(res/step)+2;col++){
+    const x=col*step-offset+rr(-3,3),w=step+rr(-7,10),h=step+rr(-7,4);
+    g.fillStyle='rgba(43,42,38,.43)';g.fillRect(x+2,y+1,w-3,h-2);
+    g.fillStyle=`rgba(${Math.round(rr(128,197))},${Math.round(rr(123,183))},${Math.round(rr(102,151))},${rr(.23,.43)})`;
+    g.fillRect(x+4,y+4,w-8,h-7);
+    g.strokeStyle='rgba(248,222,175,.20)';g.lineWidth=2;g.beginPath();g.moveTo(x+4,y+4);g.lineTo(x+w-5,y+5);g.stroke();
+    if(rand()<.37){g.strokeStyle='rgba(45,42,38,.32)';g.lineWidth=1;g.beginPath();g.moveTo(x+rr(5,w*.4),y+rr(4,h*.4));g.lineTo(x+rr(w*.45,w*.85),y+rr(h*.55,h-4));g.stroke();}
+   }
+  }
+ }else if(type==='roof'){
+  for(let row=0;row<26;row++){let y=row*20;g.strokeStyle='rgba(64,33,24,.55)';g.lineWidth=3;g.beginPath();g.moveTo(0,y+19);g.lineTo(res,y+19);g.stroke();for(let col=0;col<25;col++){let x=col*23+(row%2?11:0);g.strokeStyle='rgba(255,198,132,.32)';g.beginPath();g.moveTo(x,y+2);g.lineTo(x,y+18);g.stroke();}}
+ }else if(type==='wood'){
+  for(let i=0;i<90;i++){let x=rr(0,res);g.strokeStyle=`rgba(${rand()<.5?30:226},${rand()<.5?20:155},${rand()<.5?15:97},${rr(.05,.18)})`;g.beginPath();g.moveTo(x,0);g.bezierCurveTo(x+rr(-4,4),res*.3,x+rr(-4,4),res*.6,x+rr(-6,6),res);g.stroke();}
+ }
+ const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;
+ tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.anisotropy=4;
+ return tex;
+}
+status.textContent='Preparazione dei materiali in pietra…';
+const maps={stone:makeCanvasMap('stone'),cobble:makeCanvasMap('cobble'),roof:makeCanvasMap('roof'),wood:makeCanvasMap('wood')};
+const stone=new THREE.MeshStandardMaterial({map:maps.stone,color:0xd5cbb0,roughness:1});
+const darkstone=new THREE.MeshStandardMaterial({map:maps.stone,color:0xb6ae98,roughness:1});
+const accentstone=new THREE.MeshStandardMaterial({map:maps.stone,color:0xe2d1b2,roughness:1});
+const cobble=new THREE.MeshStandardMaterial({map:maps.cobble,color:0xaca997,roughness:1});
+const roofMat=new THREE.MeshStandardMaterial({map:maps.roof,color:0xe8b18b,roughness:1,side:THREE.DoubleSide});
+const wood=new THREE.MeshStandardMaterial({map:maps.wood,color:0xcaa071,roughness:.98});
+const iron=new THREE.MeshStandardMaterial({color:0x272e2b,roughness:.73,metalness:.45});
+const glass=new THREE.MeshStandardMaterial({color:0x25444b,roughness:.17,metalness:.35});
+const moss=new THREE.MeshStandardMaterial({color:0x4f6b49,roughness:1});
+const brass=new THREE.MeshStandardMaterial({color:0xd3ae67,roughness:.28,metalness:.7});
+const plaster=new THREE.MeshStandardMaterial({color:0xdac7a3,roughness:.95});
+const leafMats=[0x547849,0x657c46,0x80934f,0x8c9a55,0x476b4a,0x9ba063].map(color=>new THREE.MeshStandardMaterial({color,roughness:.95,flatShading:true}));
+// Mesh consolidation: repeated masonry, shutter slats and small plants live in instanced batches.
+const qBlocks=[],slatBlocks=[],vineSegments=[],ivyInstances=Array.from({length:leafMats.length},()=>[]),flowerInstances=Array.from({length:4},()=>[]);
+function queuePart(list,x,y,z,w,h,d,ang=0){list.push({x,y,z,w,h,d,ang})}
+function instantiateBoxes(geometry,mat,list){if(!list.length)return;const m=new THREE.InstancedMesh(geometry,mat,list.length);const obj=new THREE.Object3D();for(let i=0;i<list.length;i++){let a=list[i];obj.position.set(a.x,a.y,a.z);obj.rotation.set(0,a.ang,0);obj.scale.set(a.w,a.h,a.d);obj.updateMatrix();m.setMatrixAt(i,obj.matrix)}m.instanceMatrix.needsUpdate=true;m.castShadow=false;m.receiveShadow=true;scene.add(m)}
+function queueLeaf(x,y,z,r,which){ivyInstances[which%ivyInstances.length].push([x,y,z,r])}
+function queueFlower(x,y,z,r,which){flowerInstances[which%flowerInstances.length].push([x,y,z,r])}
+
+function addGeom(geom,material,x,y,z,cast=false,receive=true,group=scene){let m=new THREE.Mesh(geom,material);m.position.set(x,y,z);m.castShadow=cast&&high;m.receiveShadow=receive;group.add(m);return m}
+function cube(w,h,d,mat,x,y,z,cast=true,parent=scene){return addGeom(new THREE.BoxGeometry(w,h,d),mat,x,y,z,cast,true,parent)}
+function cylinder(rad,h,mat,x,y,z,edges=10){return addGeom(new THREE.CylinderGeometry(rad,rad,h,edges),mat,x,y,z,true)}
+function beam(a,b,r,mat,segments=6){let delta=new THREE.Vector3().subVectors(new THREE.Vector3(...b),new THREE.Vector3(...a)),mid=new THREE.Vector3(...a).add(new THREE.Vector3(...b)).multiplyScalar(.5);let mesh=addGeom(new THREE.CylinderGeometry(r,r,delta.length(),segments),mat,mid.x,mid.y,mid.z,true);mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),delta.normalize());return mesh}
+
+// Distant Apennine mountains as triangulated noise field.
+const hills=new THREE.PlaneGeometry(410,410,128,128);hills.rotateX(-Math.PI/2);
+const pos=hills.getAttribute('position');let col=[];
+for(let i=0;i<pos.count;i++){
+ const x=pos.getX(i),z=pos.getZ(i);
+ let h=landY(x,z);const inner=smooth(clamp((Math.abs(x)-28)/30,0,1));
+ h+=inner*(2.8*Math.sin(z*.027+x*.014)+6*fbm(x*.012,z*.012));
+ pos.setY(i,h);
+ const g=clamp((h+2)/27,0,1),n=rr(-.07,.07),c=new THREE.Color().setRGB(.28+g*.09+n,.34+g*.12+n,.25+g*.10+n);col.push(c.r,c.g,c.b);
+}
+hills.setAttribute('color',new THREE.Float32BufferAttribute(col,3));hills.computeVertexNormals();
+const terrain=addGeom(hills,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1,flatShading:false}),0,0,0,false);
+terrain.rotation.y=0;
+
+// Irregular rising cobbled lane. Thousands of stone blocks, one draw call.
+status.textContent='Posa degli acciottolati e delle case…';
+const stoneBase=new THREE.BoxGeometry(.45,.12,.48);
+const roads=[];for(let z=37;z>-66;z-=.49){const x0=curve(z);for(let x=-3.5;x<3.6;){let w=rr(.32,.62),sx=x+w*.5+rr(-.035,.035);roads.push([x0+sx,roadY(z)+.01+rr(-.013,.018),z+rr(-.065,.065),w,rr(.78,1.06),rr(-.13,.13)]);x+=w+rr(.01,.055)}}
+const stoneMesh=new THREE.InstancedMesh(stoneBase,cobble,roads.length);stoneMesh.instanceMatrix.setUsage(THREE.StaticDrawUsage);stoneMesh.receiveShadow=true;
+const dummy=new THREE.Object3D();const tint=new THREE.Color();
+for(let i=0;i<roads.length;i++){let [x,y,z,w,s,ang]=roads[i];dummy.position.set(x,y,z);dummy.rotation.set(0,ang,0);dummy.scale.set(w/.45,rr(.7,1.3),s);dummy.updateMatrix();stoneMesh.setMatrixAt(i,dummy.matrix);let v=rr(.73,1.07);tint.setRGB(v,v*(.96+rand()*.05),v*(.90+rand()*.07));stoneMesh.setColorAt(i,tint);}stoneMesh.instanceMatrix.needsUpdate=true;scene.add(stoneMesh);
+// Roadside drainage stones and grass between joints.
+const edgeMat=new THREE.MeshStandardMaterial({color:0x9c927c,roughness:1});
+for(let z=39;z>-64;z-=1.65){for(const side of [-1,1]){let x=curve(z)+side*3.81;let curb=cube(rr(.42,.6),rr(.23,.32),1.55,rand()<.65?darkstone:edgeMat,x,roadY(z)+.08,z,false);curb.rotation.y=rr(-.05,.05);}}
+
+// Roof geometry is genuinely sloped, with individually curved terracotta rows.
+const tiles=[];const tileGeo=new THREE.PlaneGeometry(.43,.57,5,1);
+const tilePos=tileGeo.attributes.position;
+for(let i=0;i<tilePos.count;i++){const x=tilePos.getX(i)/.43+.5;tilePos.setZ(i,Math.sin(Math.PI*x)*.064)}tileGeo.computeVertexNormals();
+function roofFor(house,base,height,width,depth){
+ const cx=house.x,cz=house.z,y=base+height+.08;
+ const rise=width*.24,half=width*.5+.48;
+ for(const sign of [-1,1]){
+  const pts=[[-.5,0], [.5,0],[.5,1],[-.5,1]].map(([u,v])=>[cx+sign*(half*u+half/2),y+rise*(1-u),cz+(v-.5)*(depth+.9)]);
+  // More robust explicit quad: from ridge to eaves.
+  const ps=[[cx,y+rise,cz-depth/2-.53],[cx+sign*half,y,cz-depth/2-.53],[cx+sign*half,y,cz+depth/2+.53],[cx,y+rise,cz+depth/2+.53]];
+  const verts=new Float32Array([...ps[0],...ps[1],...ps[2],...ps[0],...ps[2],...ps[3]]);
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(verts,3));geo.computeVertexNormals();
+  const roof=addGeom(geo,roofMat,0,0,0,true);roof.material.side=THREE.DoubleSide;
+  // Each row follows roof pitch; texture geometry, not a flat stamp.
+  for(let step=0;step<Math.ceil(half/.39);step++)for(let q=0;q<Math.ceil((depth+.8)/.52);q++){
+   let t=(step+.5)*.39/half;if(t>1)continue;
+   const x=cx+sign*t*half,
+   ty=y+rise*(1-t)+.035,
+   z=cz-(depth+.8)/2+(q+.5)*.52+(step%2)*.23;
+   tiles.push({x,y:ty,z,angle:sign*Math.atan2(rise,half),hue:rr(.75,1.15)});
+  }
+ }
+ let ridge=addGeom(new THREE.CylinderGeometry(.15,.15,depth+1.05,8),roofMat,cx,y+rise+.02,cz,true);
+ ridge.rotation.x=Math.PI/2;
+}
+
+// Stone doors, shuttered windows, actual recesses, lintels and ironwork.
+function windowAt(front,z,y,width=.91,height=1.21,side=1,balcony=false){
+ const sx=side,dep=front+sx*.033;
+ cube(.075,height+.25,width+.21,accentstone,dep,y,z,true);
+ cube(.10,height-.10,width-.10,glass,dep+sx*.075,y,z,true);
+ cube(.12,.095,width+.33,darkstone,dep+sx*.14,y+height*.53,z,true);
+ cube(.12,.10,width+.28,darkstone,dep+sx*.14,y-height*.53,z,true);
+ let sill=cube(.28,.11,width+.40,accentstone,dep+sx*.12,y-height*.60,z,true);
+ // Slatted open green shutters with aged wood.
+ const shutter=new THREE.MeshStandardMaterial({color:pick([0x4d6655,0x667965,0x636758,0x696347]),roughness:.91});
+ for(const dir of [-1,1]){
+  const zz=z+dir*(width*.5+.26);
+  cube(.105,height+.13,.34,shutter,dep+sx*.13,y,zz,true);
+  for(let i=0;i<6;i++)queuePart(slatBlocks,dep+sx*.18,y-height*.39+i*.17,zz,.13,.045,.32);
+ }
+ cube(.16,.065,width+.29,accentstone,dep+sx*.155,y+height*.57,z,true);
+ if(balcony){
+  cube(.8,.13,width+.6,stone,front+sx*.38,y-height*.64,z,true);
+  for(let i=0;i<6;i++)cube(.05,.63,.052,iron,front+sx*.65,y-height*.38,z-width*.5-.19+i*(width+.37)/5,true);
+  beam([front+sx*.65,y-height*.08,z-width*.62],[front+sx*.65,y-height*.08,z+width*.62],.04,iron,5);
+ }
+}
+function doorAt(front,z,y,side=1,arch=true){
+ const dep=front+side*.058;
+ cube(.13,2.55,1.50,accentstone,dep,y+1.22,z,true);
+ cube(.14,2.25,1.27,wood,dep+side*.094,y+1.09,z,true);
+ // Raised wooden planks, iron strap-hinges and a brass knob.
+ for(let q=-1;q<=1;q++)cube(.05,2.17,.022,darkstone,dep+side*.175,y+1.09,z+q*.34,true);
+ for(let h of [.44,1.77]){cube(.16,.072,1.25,iron,dep+side*.182,y+h,z,false)}
+ let knob=addGeom(new THREE.SphereGeometry(.055,10,8),brass,dep+side*.227,y+1.05,z+.39,true);
+ if(arch){
+  for(let i=0;i<9;i++){
+   const theta=Math.PI*i/8,r=.78;
+   const zz=z+Math.cos(theta)*r,yy=y+2.22+Math.sin(theta)*.67;
+   let b=cube(.24,.21,.34,accentstone,dep+side*.07,yy,zz,true);
+   b.rotation.x=Math.PI*.5-theta;
+  }
+ }
+ cube(.45,.12,1.7,darkstone,dep+side*.21,y-.05,z,true);
+}
+const cornice=new THREE.MeshStandardMaterial({color:0xb8a88c,roughness:1});
+function houseAt({side,z,width=7.5,depth=7,height=7.8,mode=0,offset=0,balcony=false}){
+ const x=curve(z)+side*(3.8+width/2+.55+offset),base=roadY(z)-.22;
+ const group=new THREE.Group();scene.add(group);
+ const mat=mode===1?plaster:mode===2?darkstone:stone;
+ const house=cube(width,height,depth,mat,x,base+height/2,z,true);
+ const front=x-side*width/2-side*.05;
+ // Course lines, quoins and banding are real geometry.
+ for(let h=0;h<height;h+=1.42){cube(width+.065,.09,depth+.12,mode===1?accentstone:darkstone,x,base+h,z,false)}
+ for(const zz of [z-depth/2+.18,z+depth/2-.18])for(let h=.35;h<height-.4;h+=.52){
+   queuePart(qBlocks,front+side*.16,base+h,zz,.17,.32,.55);
+ }
+ const count=height>8.8?3:2;
+ for(let level=1;level<=count;level++){
+  const yy=base+level*2.55;
+  if(yy+1>base+height)continue;
+  for(let k of [-1,1]){
+   const zz=z+k*depth*.24;
+   windowAt(front,zz,yy,.78,1.16,side,balcony&&level===2&&k===1);
+  }
+ }
+ doorAt(front,z+depth*.06,base,side);
+ // Upper cornice, basement, eaves, one tiny chimney.
+ cube(width+.24,.23,depth+.15,cornice,x,base+height-.04,z,false);
+ roofFor({x,z},base,height,width,depth);
+ if(rand()<.65){cube(.6,1.25,.59,darkstone,x+rr(-width*.24,width*.24),base+height+width*.23+1,z+rr(-depth*.3,depth*.3),true)}
+ // Wall ivy and flowers on two façades.
+ for(let k=0;k<(mobile?2:5);k++){
+  const vx=front+side*.23,vy=base+rr(1.1,4),vz=z+rr(-depth*.45,depth*.45);
+  makeIvy(vx,vy,vz,side,Math.round(rr(8,18)));
+ }
+ return house;
+}
+function makeIvy(x,y,z,side,n){
+ let last=[x,y,z];
+ for(let i=0;i<n;i++){
+  const next=[x+side*rr(.02,.17),y+i*.15,z+Math.sin(i*.63)*.14];
+  vineSegments.push(...last,...next);last=next;
+  for(let j=0;j<3;j++){queueLeaf(next[0],next[1]+rr(-.07,.08),next[2]+rr(-.11,.11),rr(.045,.085),Math.floor(rand()*leafMats.length));}
+ }
+}
+
+// Construct the medieval corridor with variation in heights, spacing, textures, roofs.
+const houses=[
+ {side:-1,z:29,width:7.4,depth:9,height:8.3,mode:0,offset:.0,balcony:true},
+ {side:1,z:28,width:7.9,depth:8.8,height:9.7,mode:1,offset:.1},
+ {side:-1,z:18,width:7.3,depth:8.3,height:7.6,mode:2,offset:.2},
+ {side:1,z:18,width:8.6,depth:8.3,height:7.9,mode:0,offset:0,balcony:true},
+ {side:-1,z:8,width:7.5,depth:8.8,height:9.2,mode:1,offset:.1},
+ {side:1,z:8,width:7.3,depth:8.1,height:8.8,mode:2,offset:.2},
+ {side:-1,z:-3,width:7.1,depth:8.1,height:7.9,mode:0,offset:.1},
+ {side:1,z:-3,width:7.7,depth:9,height:8.7,mode:0,offset:0},
+ {side:-1,z:-14,width:8,depth:9.6,height:8.4,mode:2,offset:0},
+ {side:1,z:-14,width:7.8,depth:9.6,height:9.7,mode:1,offset:0,balcony:true},
+ {side:-1,z:-40,width:7.7,depth:9.1,height:8.7,mode:0,offset:.5},
+ {side:1,z:-40,width:8.1,depth:8.4,height:7.4,mode:2,offset:.7}
+];
+for(const h of houses)houseAt(h);
+
+// A pass-through stone arch, with radial voussoirs, over the cobbled road.
+function gateway(z){
+ const base=roadY(z),x=curve(z),R=3.7;
+ for(let side of [-1,1]){
+  cube(1.2,3.7,2.1,stone,x+side*R,base+1.8,z,true);
+  for(let yy=.2;yy<3.8;yy+=.42)cube(1.37,.045,2.25,darkstone,x+side*R,base+yy,z,false);
+ }
+ // Ring of wedge-like radial blocks forming a visible vaulted opening.
+ for(let i=0;i<=16;i++){
+  const theta=Math.PI*i/16,
+    xx=x+R*Math.cos(theta), yy=base+3.65+R*Math.sin(theta),
+    block=cube(.47,.78,2.35,i%3?stone:accentstone,xx,yy,z,true);
+  block.rotation.z=theta-Math.PI/2;
+ }
+ cube(1.2,.8,2.1,stone,x,base+7.53,z,true);
+ for(let xx=-2.9;xx<=3;xx+=1.18)cube(1.1,.7,2.1,stone,x+xx,base+8.25,z,true);
+ // Ancient coat of arms (an undecorated stone relief, not a claimed real emblem).
+ const disk=addGeom(new THREE.CylinderGeometry(.31,.31,.095,12),accentstone,x,base+7.65,z+1.19,true);
+ disk.rotation.x=Math.PI/2;
+}
+gateway(-25);
+
+// Castle keep / tower, behind the lane. Large real crenellations add silhouette.
+function keepTower(){
+ const z=-58,base=roadY(z)-.55;
+ const center=curve(z),x=center-2;
+ cube(11,17,11,stone,x,base+8.4,z-3.3,true);
+ for(let h=.5;h<17;h+=1.14)cube(11.1,.095,11.14,darkstone,x,base+h,z-3.3,false);
+ cube(12,.47,12,accentstone,x,base+17.05,z-3.3,true);
+ for(let side of [-1,1])for(let i=-2;i<=2;i++){
+  cube(1.4,1.6,1.4,stone,x+side*5.38,base+18.02,z-3.3+i*2.3,true);
+  cube(1.5,1.6,1.4,stone,x+i*2.2,base+18.02,z-3.3+side*5.38,true);
+ }
+ // Gate to create a focal point and spatial scale.
+ cube(7.5,4.7,.20,darkstone,x+2,base+2.4,z+2.35,true);
+ const gate=addGeom(new THREE.PlaneGeometry(2.5,3.4),wood,x+2,base+1.65,z+2.52,false);
+ for(let k=0;k<5;k++)cube(.08,2.8,.13,wood,x+.99+k*.51,base+1.7,z+2.58,false);
+ for(let level=0;level<3;level++){
+  for(let q of [-1,1]){
+   let w=cube(.22,1.05,.72,glass,x+q*3.1,base+6+level*3.4,z+2.47,true);
+   cube(.33,.12,.98,accentstone,x+q*3.1,base+6.59+level*3.4,z+2.50,true);
+  }
+ }
+ // Secondary watchtower skyline and overgrown wall.
+ const sideX=x-9.0;
+ cube(5.5,13,6.3,darkstone,sideX,base+6.5,z-9.2,true);
+ for(let i=-1;i<=1;i++)for(let e of [-1,1])cube(1.15,1.7,1.2,stone,sideX+i*1.8,base+13.6,z-9.2+e*2.8,true);
+}
+keepTower();
+
+// Tile each roof with instanced geometry, color variation is baked into instance colors.
+status.textContent='Aggiunta dei coppi e delle persiane…';
+const terracotta=new THREE.MeshStandardMaterial({color:0xe8a279,roughness:1,side:THREE.DoubleSide,vertexColors:false});
+const allTiles=new THREE.InstancedMesh(tileGeo,terracotta,tiles.length);
+for(let i=0;i<tiles.length;i++){
+ const a=tiles[i];dummy.position.set(a.x,a.y,a.z);
+ // Flat roof tiles lie in XY initially; rotate to horizontal XZ and tilt according to roof slope.
+ dummy.rotation.set(-Math.PI/2,0,a.angle);
+ dummy.scale.set(1,1,1);dummy.updateMatrix();allTiles.setMatrixAt(i,dummy.matrix);
+ const v=a.hue;tint.setRGB(v,clamp(v*.86,.4,1),clamp(v*.72,.35,1));allTiles.setColorAt(i,tint);
+}
+allTiles.instanceMatrix.needsUpdate=true;allTiles.castShadow=false;allTiles.receiveShadow=true;scene.add(allTiles);
+
+// Flowers, wood shutters, iron lanterns and courtyard pots.
+const clay=new THREE.MeshStandardMaterial({color:0xac6945,roughness:.97});
+const lanternGlass=new THREE.MeshStandardMaterial({color:0xffd89a,emissive:0xffa648,emissiveIntensity:1.6,roughness:.25});
+const blossom=[0xb44b58,0xdf9b68,0xe7cdb6,0xe6a777].map(color=>new THREE.MeshStandardMaterial({color,roughness:.84}));
+function flowerPot(x,y,z,large=false){
+ const r=large?.38:.22;
+ let pot=addGeom(new THREE.CylinderGeometry(r*1.15,r*.75,r*1.8,10),clay,x,y+r*.8,z,true);
+ addGeom(new THREE.CylinderGeometry(r*1.3,r*1.3,r*.25,10),clay,x,y+r*1.71,z,true);
+ for(let i=0;i<(large?16:9);i++){
+  let ox=rr(-r*.65,r*.65),oz=rr(-r*.65,r*.65);
+  const stem=new THREE.Vector3(x+ox,y+r*1.75+rr(.1,.8),z+oz);
+  vineSegments.push(x,y+r*1.75,z,stem.x,stem.y,stem.z);
+  queueLeaf(stem.x,stem.y,stem.z,rr(.07,.12),Math.floor(rand()*leafMats.length));
+  if(rand()<.58)queueFlower(stem.x+rr(-.06,.06),stem.y+rr(-.06,.07),stem.z+rr(-.06,.06),rr(.05,.085),Math.floor(rand()*blossom.length));
+ }
+}
+for(let i=0;i<40;i++){
+ let z=rr(-50,34),side=rand()<.5?-1:1,x=curve(z)+side*rr(4.6,5.2);
+ if(Math.abs(z+25)<5)continue;
+ flowerPot(x,roadY(z)+rr(0,.18),z,rand()<.2);
+}
+function lamp(x,y,z,side){
+ // Forged-iron bracket with shaped lantern glass.
+ beam([x,y+.5,z],[x+side*.72,y+.78,z],.055,iron);
+ beam([x+side*.55,y+.68,z],[x+side*.72,y+.15,z],.037,iron);
+ cube(.35,.53,.35,lanternGlass,x+side*.7,y-.12,z,true);
+ cube(.5,.10,.5,iron,x+side*.7,y+.16,z,true);
+ cube(.5,.13,.5,iron,x+side*.7,y-.45,z,true);
+ if(high){const p=new THREE.PointLight(0xffbf6b,.33,6);p.position.set(x+side*.7,y-.13,z);scene.add(p)}
+}
+for(const z of [23,9,-8,-43])for(const side of [-1,1]){
+ const x=curve(z)+side*4.37;
+ lamp(x,roadY(z)+4.3,z, -side);
+}
+
+// Consolidate small repeated detail into a handful of draw calls.
+instantiateBoxes(new THREE.BoxGeometry(1,1,1),accentstone,qBlocks);
+instantiateBoxes(new THREE.BoxGeometry(1,1,1),wood,slatBlocks);
+if(vineSegments.length){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(vineSegments,3));scene.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:0x4a6747,transparent:true,opacity:.78})));}
+for(let j=0;j<ivyInstances.length;j++){
+ const li=ivyInstances[j];if(!li.length)continue;const mesh=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,0),leafMats[j],li.length);
+ for(let i=0;i<li.length;i++){const a=li[i];dummy.position.set(a[0],a[1],a[2]);dummy.rotation.set(0,rr(0,6.28),rr(-.4,.4));dummy.scale.set(a[3]*.75,a[3]*1.2,a[3]*.5);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix)}mesh.instanceMatrix.needsUpdate=true;mesh.castShadow=false;scene.add(mesh);
+}
+for(let j=0;j<flowerInstances.length;j++){
+ const li=flowerInstances[j];if(!li.length)continue;const mesh=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,1),blossom[j],li.length);
+ for(let i=0;i<li.length;i++){const a=li[i];dummy.position.set(a[0],a[1],a[2]);dummy.rotation.set(rr(-.4,.4),rr(0,6.28),rr(-.4,.4));dummy.scale.set(a[3],a[3],a[3]);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix)}mesh.instanceMatrix.needsUpdate=true;mesh.castShadow=false;scene.add(mesh);
+}
+
+// Chestnuts and shrubs are themselves procedural geometry, instanced in groups.
+status.textContent='Coltivazione dei castagneti…';
+const treePoints=[];
+for(let i=0;i<(mobile?210:470);i++){
+ let x=rr(-135,135),z=rr(-120,85);
+ if(Math.abs(x-curve(z))<21||Math.hypot(x,z+42)<12)continue;
+ const y=landY(x,z),scale=rr(1.8,5.5)*(Math.abs(x)>60?1.2:1);
+ treePoints.push([x,y,z,scale]);
+}
+const trunkMat=new THREE.MeshStandardMaterial({color:0x5b5140,roughness:1});
+const trunkGeometry=new THREE.CylinderGeometry(.13,.23,1,6);
+const trunkI=new THREE.InstancedMesh(trunkGeometry,trunkMat,treePoints.length);
+const crownGeometry=new THREE.IcosahedronGeometry(1,1);
+const foliageI=new THREE.InstancedMesh(crownGeometry,leafMats[0],treePoints.length*4);
+for(let i=0;i<treePoints.length;i++){
+ const [x,y,z,s]=treePoints[i];
+ dummy.position.set(x,y+s*.50,z);dummy.rotation.set(0,rand()*Math.PI*2,rr(-.08,.08));dummy.scale.set(s*.64,s*1.04,s*.64);dummy.updateMatrix();trunkI.setMatrixAt(i,dummy.matrix);
+ for(let c=0;c<4;c++){
+  let theta=c*Math.PI/2+rr(-.6,.6),r=s*rr(.18,.36),cx=x+Math.cos(theta)*r,cy=y+s*(c===3?1.6:1.22)+rr(-.1,.24)*s,cz=z+Math.sin(theta)*r;
+  dummy.position.set(cx,cy,cz);dummy.rotation.set(rr(0,.4),rand()*6,rr(0,.3));dummy.scale.set(s*rr(.42,.63),s*rr(.52,.74),s*rr(.45,.60));dummy.updateMatrix();foliageI.setMatrixAt(i*4+c,dummy.matrix);
+  const v=rr(.6,1.2);tint.setRGB(v*.59,v*.77,v*.47);foliageI.setColorAt(i*4+c,tint);
+ }
+}
+trunkI.instanceMatrix.needsUpdate=true;foliageI.instanceMatrix.needsUpdate=true;
+trunkI.castShadow=high;foliageI.castShadow=false;foliageI.receiveShadow=true;
+scene.add(trunkI,foliageI);
+
+// Climbing ivy around the old arch and a few dandelion-like grasses near the curbs.
+for(let i=0;i<25;i++){
+ const z=rr(-48,36),side=rand()<.5?-1:1,x=curve(z)+side*rr(4.0,5.0);
+ let p=new THREE.Mesh(new THREE.ConeGeometry(rr(.12,.25),rr(.48,.9),4),pick(leafMats));
+ p.position.set(x,roadY(z)+.29,z);p.rotation.z=rr(-.4,.4);scene.add(p);
+}
+
+// Atmospheric dust in shafts of warm light; cheap instanced particles.
+const dustCount=mobile?150:410;
+const dustGeo=new THREE.BufferGeometry(),points=[];
+for(let i=0;i<dustCount;i++)points.push(rr(-17,17),rr(1,16),rr(-54,37));
+dustGeo.setAttribute('position',new THREE.Float32BufferAttribute(points,3));
+const dustMat=new THREE.PointsMaterial({color:0xf0d7a1,size:mobile?.075:.11,transparent:true,opacity:.35,depthWrite:false,sizeAttenuation:true});
+scene.add(new THREE.Points(dustGeo,dustMat));
+
+// Player is a free-walk prototype; Thais GLB and controller follow in the next milestone.
+let started=false,menu=true,yaw=0,pitch=-.035;
+const player=new THREE.Vector3(curve(34),roadY(34)+1.74,34);
+const forward=new THREE.Vector3(),right=new THREE.Vector3();
+let pressed=new Set(),vel=new THREE.Vector3(),mouseDX=0,mouseDY=0;
+const eyeHeight=1.74;
+function control(e,down){const k=e.code;if(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight'].includes(k)){
+  e.preventDefault();if(down)pressed.add(k);else pressed.delete(k);
+}}
+window.addEventListener('keydown',e=>{
+ if(e.code==='Escape'){if(started){toggleMenu(true);document.exitPointerLock?.()}return}
+ control(e,true)
+});window.addEventListener('keyup',e=>control(e,false));
+function fit(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+window.addEventListener('resize',fit);fit();
+function toggleMenu(open){menu=open;$('intro').classList.toggle('hide',!open);$('hud').style.display=open?'none':'block';$('menuButton').style.display=open?'none':'block';$('quality').style.display=open?'none':'block';$('touch').style.display=!open&&mobile?'block':'none';$('reticle').style.display=!open&&!mobile?'block':'none';if(open)document.exitPointerLock?.()}
+$('start').onclick=()=>{
+ started=true;toggleMenu(false);
+ if(!mobile)renderer.domElement.requestPointerLock?.().catch?.(()=>{});
+};$('menuButton').onclick=()=>toggleMenu(true);
+$('quality').textContent=high?'Dettaglio: Alto':'Dettaglio: Mobile';
+$('quality').onclick=()=>{high=!high;renderer.shadowMap.enabled=high;renderer.setPixelRatio(Math.min(devicePixelRatio,high?1.7:1.05));fit();$('quality').textContent=high?'Dettaglio: Alto':'Dettaglio: Mobile'};
+renderer.domElement.addEventListener('click',()=>{if(started&&!menu&&!mobile&&!document.pointerLockElement)renderer.domElement.requestPointerLock?.().catch?.(()=>{})});
+window.addEventListener('mousemove',e=>{if(document.pointerLockElement===renderer.domElement){mouseDX+=e.movementX;mouseDY+=e.movementY}});
+document.addEventListener('pointerlockchange',()=>{
+ if(started&&!mobile&&!document.pointerLockElement&&!menu)toggleMenu(true);
+});
+// Touch: left analog, right drag for camera.
+let stick=0,stickX=0,stickY=0,viewFinger=null,lastPX=0,lastPY=0;
+const joy=$('joy'),nub=$('nub');
+joy.addEventListener('pointerdown',e=>{e.preventDefault();stick=e.pointerId;joy.setPointerCapture(e.pointerId)});
+joy.addEventListener('pointermove',e=>{if(e.pointerId!==stick)return;const rect=joy.getBoundingClientRect(),cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;stickX=clamp((e.clientX-cx)/48,-1,1);stickY=clamp((e.clientY-cy)/48,-1,1);nub.style.transform=`translate(${stickX*37}px,${stickY*37}px)`;});
+function resetStick(e){if(e.pointerId!==stick)return;stick=0;stickX=stickY=0;nub.style.transform='';}
+joy.addEventListener('pointerup',resetStick);joy.addEventListener('pointercancel',resetStick);
+renderer.domElement.addEventListener('pointerdown',e=>{if(!mobile||menu||e.clientX<innerWidth*.28)return;viewFinger=e.pointerId;lastPX=e.clientX;lastPY=e.clientY;renderer.domElement.setPointerCapture(e.pointerId)});
+renderer.domElement.addEventListener('pointermove',e=>{if(e.pointerId!==viewFinger)return;mouseDX+=(e.clientX-lastPX)*1.25;mouseDY+=(e.clientY-lastPY)*1.25;lastPX=e.clientX;lastPY=e.clientY});
+renderer.domElement.addEventListener('pointerup',e=>{if(e.pointerId===viewFinger)viewFinger=null});
+renderer.domElement.addEventListener('pointercancel',e=>{if(e.pointerId===viewFinger)viewFinger=null});
+
+const clock=new THREE.Clock();let fpsN=0,fpsT=0;
+function animate(){requestAnimationFrame(animate);const dt=Math.min(.06,clock.getDelta());
+ if(started&&!menu){
+  yaw-=mouseDX*.0022;pitch=clamp(pitch-mouseDY*.0017,-1.18,1.12);mouseDX=mouseDY=0;
+  const cp=Math.cos(pitch),sp=Math.sin(pitch);
+  forward.set(-Math.sin(yaw),0,-Math.cos(yaw));right.set(Math.cos(yaw),0,-Math.sin(yaw));
+  let ix=(pressed.has('KeyD')||pressed.has('ArrowRight')?1:0)-(pressed.has('KeyA')||pressed.has('ArrowLeft')?1:0)+stickX;
+  let iz=(pressed.has('KeyW')||pressed.has('ArrowUp')?1:0)-(pressed.has('KeyS')||pressed.has('ArrowDown')?1:0)-stickY;
+  const length=Math.hypot(ix,iz)||1;ix/=length;iz/=length;
+  let speed=pressed.has('ShiftLeft')||pressed.has('ShiftRight')?6.7:3.5;
+  const targetX=(right.x*ix+forward.x*iz)*speed,targetZ=(right.z*ix+forward.z*iz)*speed;
+  const t=1-Math.exp(-dt*8);vel.x=lerp(vel.x,targetX,t);vel.z=lerp(vel.z,targetZ,t);
+  player.x+=vel.x*dt;player.z+=vel.z*dt;
+  player.z=clamp(player.z,-53,38);
+  // Provisional walkable corridor: avoid crossing houses, preserve room below arch.
+  let cx=curve(player.z);player.x=clamp(player.x,cx-3.15,cx+3.15);
+  player.y=lerp(player.y,roadY(player.z)+eyeHeight,1-Math.exp(-dt*15));
+ }
+ camera.position.copy(player);camera.rotation.order='YXZ';camera.rotation.set(pitch,yaw,0);
+ sky.position.copy(camera.position);
+ renderer.render(scene,camera);
+ fpsT+=dt;fpsN++;if(fpsT>1.5){$('stats').textContent=`Seed 20261118 · ${Math.round(fpsN/fpsT)} fps · ${high?'Alto':'Mobile'} · ${roads.length.toLocaleString('it-IT')} ciottoli`;fpsT=0;fpsN=0}
+}
+// Start panorama in same 3D environment before entering.
+const initial=new THREE.Vector3(0,roadY(34)+1.74,34);player.copy(initial);
+// Look slightly towards the old gateway and tower. Set yaw zero facing -Z.
+camera.position.copy(player);camera.lookAt(curve(-30),roadY(-30)+1.55,-30);
+status.textContent='Borgo generato · seed 20261118 · asset procedurali';
+animate();
+
+</script>
+</body>
+</html>
