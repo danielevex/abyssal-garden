@@ -1304,29 +1304,24 @@ function makeWorld(D, T, flyPts, POSES) {
   const nearFly = (x, y, z, r) => { for (const p of flyPts) if (hypot(x - p[0], z - p[2]) < r && y < p[1] + 3 && y > p[1] - 13) return true; return false; };
   const nearPose = (x, z, r = 3) => { for (const p of POSES) if (hypot(x - p[0], z - p[2]) < r) return true; return false; };
   // Sea kelp generation removed: P11 uses separate terrestrial chestnut population.
-  // --- clusters of ribbon leaves on the ground
-  const cluster = (x, y, z, n, type, lmin, lmax, wmin, wmax, tmax, sway) => {
-    for (let i = 0; i < n; i++) {
-      const a = rnd() * TAU, r = rnd() * 0.5, L = rr(lmin, lmax);
-      leaf(big, x + cos(a) * r, y - 0.15, z + sin(a) * r, L, a, rr(0.05, tmax), rr(wmin, wmax), sway, type, rnd(), rnd(), rr(0.3, 0.8));
-    }
-  };
-  const HOT = [[0, 5, 30], [42, 30, 24], [6, 82, 34], [-58, 10, 24], [4, -88, 30], [-36, 44, 18], [-46, -60, 20]];
-  const hot = (x, z) => { let h = 0.4; for (const p of HOT) h = max(h, sstep(p[2], p[2] * 0.4, hypot(x - p[0], z - p[1]))); return h; };
+  // P11 terrestrial understory: ferns, moss and low shrubs only.
   rseed(3);
-  for (let i = 0; i < 40000; i++) {
-    const k = pickV(), x = T.wp[k], y = T.wp[k + 1], z = T.wp[k + 2], ny = T.wn[k + 1];
-    if (hypot(x, z) > 172 || y > -6) continue;
-    const h = hot(x, z), zp = zoneP(x, z), u = rnd();
-    if (nearFly(x, y, z, 4) || hypot(x + 1, z - 2) < 9 || nearPose(x, z, 8)) continue;
-    if (ny > 0.75 && u < 0.10 * h) cluster(x, y, z, 8 + rnd() * 14 | 0, 2, 1.0, 3.0, 0.13, 0.26, 0.6, 2.5);
-    else if (ny > 0.6 && u < 0.10 * h + 0.07 * max(zp, h * 0.4)) cluster(x, y, z, 10 + rnd() * 18 | 0, rnd() < 0.8 ? 3 : 4, 0.9, 2.6, 0.14, 0.28, 0.9, 1.5);
-    else if (ny < -0.35 && u < 0.5 * max(zp, 0.2)) { // hanging fronds
-      const n = 12 + rnd() * 20 | 0;
-      for (let j = 0; j < n; j++) leaf(big, x + rr(-0.6, 0.6), y + 0.2, z + rr(-0.6, 0.6), rr(0.8, 3.2), rnd() * TAU, PI - rr(0, 0.4), rr(0.08, 0.18), 0, zp > 0.3 || rnd() < 0.5 ? 6 : 0, rnd(), rnd(), rr(0.3, 0.6));
-    } else if (ny > -0.2 && ny < 0.8 && u < 0.07) { // wall tufts
-      const yaw = atan2(T.wn[k + 2], T.wn[k]), n = 5 + rnd() * 7 | 0;
-      for (let j = 0; j < n; j++) leaf(big, x, y, z, rr(0.5, 1.4), yaw + rr(-0.9, 0.9), rr(0.3, 1.1), rr(0.06, 0.12), 0.5, zp > 0.4 && rnd() < 0.6 ? 3 : 0, rnd(), rnd(), rr(0.2, 0.6));
+  for(let i=0;i<(LV===0?79000:LV===1?44000:22000);i++){
+    const k=pickV(),x=T.wp[k],y=T.wp[k+1],z=T.wp[k+2],ny=T.wn[k+1];
+    if(hypot(x,z)>170||y>-7||nearPose(x,z,5))continue;
+    const u=rnd();
+    if(ny>.80&&u<.13){
+      const n=4+(rnd()*9|0),orientation=rr(0,TAU);
+      for(let j=0;j<n;j++){
+        const angle=orientation+j*TAU/n+rr(-.13,.13);
+        leaf(big,x+rr(-.3,.3),y-.04,z+rr(-.3,.3),
+          rr(.22,.79),angle,rr(.18,1.1),rr(.04,.12),0,
+          rnd()<.08?4:0,rnd(),rnd(),rr(.21,.52));
+      }
+    }else if(ny>.40&&ny<=.80&&u<.07){
+      const n=5+(rnd()*6|0),angle=atan2(T.wn[k+2],T.wn[k]);
+      for(let j=0;j<n;j++)leaf(big,x,y,z,rr(.20,.60),angle+rr(-.65,.65),
+        rr(.30,1.35),rr(.045,.13),0,0,rnd(),rnd(),rr(.2,.5));
     }
   }
   // P11 Castagneto: tree trunks with 3D branch geometry and individually-instanced leaves.
@@ -1360,30 +1355,26 @@ function makeWorld(D, T, flyPts, POSES) {
   for(const p of [[-16,-10],[19,-23],[-24,-36],[27,-45],[-19,15],[25,26],[-26,55],[30,66],[-33,-72],[29,-79],[-18,83],[20,102]])
     chestnut(p[0],p[1],rr(.87,1.13));
   
-  // --- ground cover: dense carpets of small tufts in the magenta patches
+  // Meadows: dense irregular ground vegetation without luminous coral.
   rseed(4);
-  for (const p of MAGENTA) for (let i = p[2] * p[2] * PI * 45; i > 0; i--) {
-    const a = rnd() * TAU, r = sqrt(rnd()) * p[2], x = p[0] + cos(a) * r, z = p[1] + sin(a) * r;
-    if (rnd() > magAt(x, z) + 0.12 || nearPose(x, z)) continue;
-    const f = floorsAt(x, z); if (!f.length) continue;
-    const y = f[f.length - 2]; if (grad(x, y, z)[1] < 0.7) continue;
-    const nl = 2 + (rnd() * 3 | 0), yw = rnd() * TAU;
-    for (let j = 0; j < nl; j++) leaf(small, x, y - 0.03, z, rr(0.08, 0.26), yw + j * TAU / nl + rr(-0.4, 0.4), rr(0.15, 0.85), rr(0.035, 0.07), 0, 5, rnd(), rnd(), rr(0.3, 0.7));
-    if (rnd() < 0.3) for (let j = 0; j < 2; j++) leaf(small, x + rr(-0.2, 0.2), y - 0.04, z + rr(-0.2, 0.2), rr(0.2, 0.55), rnd() * TAU, rr(0.05, 0.6), rr(0.03, 0.06), 0, 7, rnd(), rnd(), rr(0.3, 0.8));
-    if (rnd() < 0.3) glint(x, y + rr(0.08, 0.22), z, 0, rnd(), 0.82 + rnd() * 0.18, rr(0.01, 0.02), 0);
-  }
-  rseed(5);
-  for (let i = 0; i < 620000; i++) {
-    const k = pickV(), ny = T.wn[k + 1];
-    if (ny < 0.72) continue;
-    const x = T.wp[k] + rr(-0.45, 0.45), z = T.wp[k + 2] + rr(-0.45, 0.45), y = T.wp[k + 1];
-    if (hypot(x, z) > 170 || nearPose(x, z)) continue;
-    const m = magAt(x, z), zp = zoneP(x, z), u = rnd();
-    if (m > 0.3 && u < m * 0.9) for (let j = 0; j < 4; j++) leaf(small, x + rr(-0.1, 0.1), y - 0.05, z + rr(-0.1, 0.1), rr(0.12, 0.34), rnd() * TAU, rr(0.05, 0.75), rr(0.04, 0.08), 0, 5, rnd(), rnd(), rr(0.3, 0.7));
-    else if (u < m * 0.9 + 0.5 * max(zp, hot(x, z)) * sstep(0.42, 0.6, fbm(x * 0.09, 9, z * 0.09, 2))) for (let j = 0; j < 3; j++) leaf(small, x + rr(-0.1, 0.1), y - 0.05, z + rr(-0.1, 0.1), rr(0.25, 0.7), rnd() * TAU, rr(0.1, 0.8), rr(0.05, 0.1), 0, 7, rnd(), rnd(), rr(0.3, 0.8));
+  for(let i=0;i<(LV===0?175000:LV===1?94000:49000);i++){
+    const k=pickV(),ny=T.wn[k+1];
+    if(ny<.70)continue;
+    const x=T.wp[k]+rr(-.45,.45),z=T.wp[k+2]+rr(-.45,.45),y=T.wp[k+1];
+    if(hypot(x,z)>167||y>-7||nearPose(x,z,3.2))continue;
+    const path=sin(z*.041)*.68+sin(z*.097)*.26;
+    if(abs(x-path)<2.6&&z<35&&z>-110)continue;
+    if(rnd()<.18){
+      const n=2+(rnd()*4|0);
+      for(let j=0;j<n;j++){
+        leaf(small,x+rr(-.15,.15),y-.04,z+rr(-.15,.15),rr(.10,.42),
+          rr(0,TAU),rr(.30,1.15),rr(.025,.09),0,
+          rnd()<.05?4:0,rnd(),rnd(),rr(.26,.61));
+      }
+    }
   }
 
-  const spots=[]; // no sponges or coral
+    const spots=[]; // no sponges or coral
   // Floating underwater boulders suppressed; land pebbles below.
   rseed(9);
   for (let i = 0; i < 2600; i++) {
