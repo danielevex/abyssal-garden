@@ -578,9 +578,9 @@ const S_G = /*wgsl*/`
 struct G { vp: mat4x4f, sm: mat4x4f, cam: vec4f, right: vec4f, up: vec4f, fwd: vec4f, sun: vec4f, res: vec4f, mis: vec4f };
 const SIG = vec3f(.0100, .0085, .0077);
 const KD = vec3f(.0022, .0027, .0029);
-const WCOL = vec3f(.54, .59, .46);
+const WCOL = vec3f(.58, .62, .57);
 const KDZ = vec3f(.0025, .0029, .0030);
-const PCOL = vec3f(.64, .60, .48);
+const PCOL = vec3f(.68, .65, .56);
 const SUNC = vec3f(1.95, 1.49, 1.02);
 const TAU = 6.2831853;
 const LOW = ${LV > 1};
@@ -694,7 +694,7 @@ fn tri(p: vec3f, n: vec3f, s: f32) -> TP {
   let sk = textureSample(tD, sR, vec2f((i.op.x + i.op.z) * .33, i.op.y * .035));
   let sk2 = textureSample(tD, sR, vec2f((i.op.x - i.op.z) * 1.1, i.op.y * .11));
   let gm = textureSample(tM, sC, i.wp.xz / 384. + .5);
-  let ca = caus(i.wp, dist);
+  let ca = vec3f(.38);
   let hgt = A.h * .5 + B.h * .35 + C.h * .15;
   var bump = 1.7; var gloss = .1; var alb = vec3f(0.); var emi = vec3f(0.); var vao = 1.; var flu = 0.;
   let flt = ss(.72, .93, n0.y);
@@ -720,16 +720,18 @@ fn tri(p: vec3f, n: vec3f, s: f32) -> TP {
       alb = mix(alb, alb * vec3f(.85, .8, 1.4) + vec3f(.015, .0, .05), gm.b * .8);
     }
   } else if (mat == 2) {
-    // whale fluke: smooth pale stone with dark streaks running along its length
-    alb = mix(vec3f(.42, .47, .48), vec3f(.10, .13, .15), ss(.40, .62, sk.a * .6 + sk2.b * .5)) * (.75 + .3 * B.h);
-    alb = mix(alb, vec3f(.60, .64, .62), ss(.62, .75, sk2.a) * .5);
-    gloss = .9; bump = .3;
+    // Sandstone, lime mortar, dark windows, terracotta roof tiles.
+    alb = mix(vec3f(.27,.255,.22),vec3f(.64,.60,.52),ss(.22,.77,A.h*.65+B.h*.35))*(.74+.40*C.h);
+    let mortar=abs(fract(i.op.y*.82+sk.a*.07)-.5);
+    alb=mix(alb,vec3f(.19,.18,.15),.40*(1.-ss(.016,.052,mortar)));
+    let terracotta=1.-ss(.55,.82,abs(i.ao-.73));
+    alb=mix(alb,vec3f(.57,.285,.125)*(.80+.30*B.h),terracotta*.94);
+    alb=mix(alb,vec3f(.06,.054,.046),1.-ss(.15,.38,i.ao));
+    gloss=.08;bump=.58;
   } else if (mat == 3) {
-    alb = mix(vec3f(.13, .085, .05), vec3f(.36, .25, .14), Wd.b) * (.6 + .5 * B.h);
-    let pk = fract(atan2(i.op.z, 2. - i.op.y) * 7.);
-    alb *= .35 + .65 * ss(0., .12, min(pk, 1. - pk));
-    alb = mix(alb, vec3f(.08, .22, .16), ss(.5, .7, A.c) * .6);
-    gloss = .2; bump = .7;
+    alb=mix(vec3f(.10,.064,.041),vec3f(.31,.18,.09),Wd.b)*(.71+.44*B.h);
+    alb*=.83+.17*sin(i.op.y*18.+A.c*11.+B.h*8.);
+    gloss=.05;bump=.73;
   } else if (mat == 4) {
     let hue = fract(sd * 7.31);
     alb = mix(vec3f(.60, .17, .08), vec3f(.64, .35, .10), fract(hue * 3.));
@@ -802,7 +804,7 @@ fn pal(h: f32) -> vec3f {
     case 4 { col = mix(vec3f(.31, .22, .08), vec3f(.46, .32, .13), s1); pr = vec4f(.2, 1., .1, 0.); spc = vec3f(1., .85, .5); shp = vec2f(.5, .4); wav = 1.8; }
     case 5 { col = mix(vec3f(.46, .29, .16), vec3f(.62, .44, .22), step(.7, s1)); col = mix(col, vec3f(.95, .25, .55), step(.75, s2)); pr = vec4f(.22, .8, 0., .30); spc = vec3f(1., .35, .8); shp = vec2f(.6, .6); fls = 2.; }
     case 6 { col = mix(vec3f(.39, .37, .12), vec3f(.61, .51, .18), s1); pr = vec4f(.06, 1., 0., .10); spc = vec3f(1., .5, .5); shp = vec2f(.4, .3); wav = 2.; }
-    default { col = mix(vec3f(.05, .40, .36), vec3f(.10, .52, .58), s1); pr = vec4f(.1, .9, .2, .04); spc = vec3f(.3, 1., .9); shp = vec2f(.6, .5); }
+    default { col = mix(vec3f(.08, .26, .07), vec3f(.14, .39, .13), s1); pr = vec4f(.1, .9, .2, .04); spc = vec3f(.3, 1., .9); shp = vec2f(.6, .5); }
   }
   pr.x = step(hs(s1 * 91.7 + s2 * 37.1 + i.b.x), pr.x);
   let k = (i.c.w - .3) * 2.0 + sin(t * (.8 + s1) * fls + s2 * 40. + hA * .25) * .10 * fls;
@@ -852,7 +854,7 @@ struct GO { @builtin(position) cp: vec4f, @location(0) uv: vec2f, @location(1) @
 }
 @fragment fn fs(i: LO, @builtin(front_facing) ff: bool) -> @location(0) vec4f {
   let dist = length(i.wp - g.cam.xyz);
-  let ca = caus2(i.wp, dist);
+  let ca = .38;
   var n = normalize(i.n); if (!ff) { n = -n; }
   let V = normalize(g.cam.xyz - i.wp); let L = g.sun.xyz;
   let z = zone(i.wp);
@@ -938,7 +940,7 @@ struct VO { @builtin(position) cp: vec4f, @location(0) wp: vec3f, @location(1) n
 }
 @fragment fn fsManta(i: VO) -> @location(0) vec4f {
   let dist = length(i.wp - g.cam.xyz);
-  let ca = caus(i.wp, dist);
+  let ca = vec3f(.38);
   let tx = textureSample(tD, sR, i.op.xz * .9 + i.sd);
   let n = normalize(i.n + (vec3f(tx.r, 0., tx.g) - vec3f(.5, 0., .5)) * .5); let L = g.sun.xyz; let V = normalize(g.cam.xyz - i.wp);
   let z = zone(i.wp); let vv = vol(i.wp);
