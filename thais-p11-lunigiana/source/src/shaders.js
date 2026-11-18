@@ -316,7 +316,7 @@ fn tri(p: vec3f, n: vec3f, s: f32) -> TP {
   if (mat <= 1) {
     // Metamorphic sandstone and low-elevation grass; no underwater coral or algae.
     let strata=sin(i.op.y*2.7+A.h*6.+big*3.);
-    let rock=mix(vec3f(.23,.23,.205),vec3f(.60,.55,.455),
+    var rock=mix(vec3f(.23,.23,.205),vec3f(.60,.55,.455),
       ss(.20,.80,A.h*.50+B.c*.29+big*.21));
     rock*=.81+.18*C.h+.07*strata;
     let silt=mix(vec3f(.24,.225,.16),vec3f(.42,.365,.26),B.h);
@@ -589,7 +589,7 @@ fn landSky(rd:vec3f)->vec3f{
  sky=mix(sky,vec3f(.67,.64,.55),haze*.21);
  let c0=textureSample(tD,sR,rd.xz*1.87+vec2f(g.cam.w*.00008,rd.y*.36));
  let c1=textureSample(tD,sR,rd.zx*2.43+vec2f(.36,g.cam.w*.00006));
- let clouds=ss(.48,.78,c0.a*.64+c1.b*.36);
+ var clouds=ss(.48,.78,c0.a*.64+c1.b*.36);
  clouds*=ss(.045,.22,rd.y)*ss(.80,.30,rd.y);
  let warm=vec3f(.88,.81,.69)*(.77+.23*solar);
  sky=mix(sky,warm,clouds*.55);
