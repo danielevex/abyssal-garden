@@ -11,12 +11,12 @@
 </head>
 <body>
 <div id="stage"></div><div id="wash"></div><div id="progress"></div>
-<div id="brand"><small>Cozy Paw Worlds · WebGPU P03</small><b>Thais in Lunigiana</b></div>
+<div id="brand"><small>Cozy Paw Worlds · WebGPU P04</small><b>Thais in Lunigiana</b></div>
 <div id="top"><button id="quality" type="button">Qualità: Alta</button><button id="menu" type="button">☰ Menu</button></div>
 <div id="hud"><strong>La via della Torre</strong><span>WASD · Mouse · Shift per correre · Esc per il menu</span><em id="stats">WebGPU · in preparazione</em></div>
 <div id="credit"><b>Verrucola</b>ispirato ai borghi della Lunigiana</div>
 <div id="touch"><div id="stick"><div id="nub"></div></div><div id="touchLabel">Trascina per guardare ↗</div></div><div id="reticle"></div>
-<div id="overlay"><div id="panel"><div class="eyebrow">Lunigiana · un borgo generato dalla matematica</div><h1>Thais <i>in</i><br>Lunigiana</h1><h2>La via della Torre</h2><p>La luce del pomeriggio attraversa i vicoli in pietra, il vento muove le fronde dei castagni e un antico borgo prende forma. Una prima passeggiata in un nuovo mondo procedurale.</p><button id="start" type="button">✦ Esplora il borgo</button><div id="note">Prototipo WebGPU P03: materiali generati sulla GPU con la metodologia di Abyssal Garden (mipmap, triplanar e normali). Ispirato a Verrucola, non una ricostruzione topografica. Thais giocabile e missioni arriveranno dopo la valutazione dell'ambiente.</div></div></div>
+<div id="overlay"><div id="panel"><div class="eyebrow">Lunigiana · un borgo generato dalla matematica</div><h1>Thais <i>in</i><br>Lunigiana</h1><h2>La via della Torre</h2><p>La luce del pomeriggio attraversa i vicoli in pietra, il vento muove le fronde dei castagni e un antico borgo prende forma. Una prima passeggiata in un nuovo mondo procedurale.</p><button id="start" type="button">✦ Esplora il borgo</button><div id="note">P04: pietre scalpellate e vere facciate con aperture visibili, materiali WebGPU procedurali e illuminazione più contrastata. Ispirato a Verrucola, non ricostruzione reale. Thais giocabile e missioni arriveranno dopo la valutazione dell'ambiente.</div></div></div>
 <div id="status">Generazione procedurale in corso…</div><div id="failure" role="alert"></div>
 <script type="module">
 /* Thais in Lunigiana — native WebGPU village renderer.
@@ -78,13 +78,54 @@ for(let j=0;j<N;j++)for(let i=0;i<N;i++){
  const P=(x,z)=>[x,ground(x,z),z],col=shade([.43,.51,.35],.17);
  quad(P(x0,z0),P(x0,z1),P(x1,z1),P(x1,z0),col,M.TERRAIN)
 }
-function stoneWallFace(x,y,z,w,h,side,plastered=false){
+
+// Individually sculpted polygonal stone face, with bevel and thickness.
+// Generated once during load; Abyssal-style triplanar textures do the rest.
+function chippedStone(x,y,z,w,h,facing,tint){
+ const outline=[[-.47,-.32],[-.22,-.49],[.24,-.47],[.48,-.23],[.47,.27],[.26,.48],[-.24,.47],[-.49,.21]];
+ const rim=outline.map(([u,v])=>[x+facing*rr(.055,.095),y+h*v,z+w*u]);
+ const center=[x+facing*rr(.135,.18),y+rr(-.015,.015),z+rr(-.015,.015)];
+ const back=outline.map(([u,v])=>[x-facing*.035,y+h*v,z+w*u]);
+ const tone=shade(tint,.025);
+ for(let i=0;i<rim.length;i++){
+   const j=(i+1)%rim.length;
+   if(facing>0)poly(center,rim[j],rim[i],tone,M.STONE);
+   else poly(center,rim[i],rim[j],tone,M.STONE);
+   if(facing>0)quad(rim[i],back[i],back[j],rim[j],shade(tint,.06),M.STONE);
+   else quad(rim[j],back[j],back[i],rim[i],shade(tint,.06),M.STONE);
+ }
+}
+
+function stoneWallFace(x,y,z,w,h,side,plastered=false,openings=[]){
  const ix=side===-1?x+.065:x-.065;
- if(plastered){put(x,y+h*.5,z,.23,h,w,M.PLASTER,shade([.80,.76,.67],.055));
-   for(let v=0;v<14;v++){if(rnd()<.35){let a=rr(-w*.42,w*.42),q=rr(.8,h-.8);put(x+side*.135,y+q,z+a,.018,rr(.12,.4),rr(.2,.7),M.STONE,shade([.77,.74,.68],.12));}}return;
+ if(plastered){
+   // Cut real voids in plaster at each window/door opening; no full white wall
+   // hiding the recessed windows. Panel seams overlap to remain invisible.
+   const unique=a=>[...new Set(a.map(v=>Math.round(v*1000)/1000))].sort((a,b)=>a-b);
+   const yCuts=unique([0,h,...openings.flatMap(o=>[clamp(o.y-y-o.h*.5,0,h),clamp(o.y-y+o.h*.5,0,h)])]);
+   const zCuts=unique([-w*.5,w*.5,...openings.flatMap(o=>[clamp(o.z-z-o.w*.5,-w*.5,w*.5),clamp(o.z-z+o.w*.5,-w*.5,w*.5)])]);
+   for(let yi=0;yi<yCuts.length-1;yi++)for(let zi=0;zi<zCuts.length-1;zi++){
+     const ya=yCuts[yi],yb=yCuts[yi+1],za=zCuts[zi],zb=zCuts[zi+1];
+     if(yb-ya<.025||zb-za<.025)continue;
+     const yy=y+(ya+yb)*.5,zz=z+(za+zb)*.5;
+     if(openings.some(o=>Math.abs(yy-o.y)<o.h*.5-.004&&Math.abs(zz-o.z)<o.w*.5-.004))continue;
+     put(x+side*.06,yy,zz,.21,(yb-ya)+.008,(zb-za)+.008,M.PLASTER,shade([.77,.72,.63],.018));
+   }
+   // Patches where old lime plaster reveals sandstone near street level.
+   for(let v=0;v<17;v++)if(rnd()<.35){
+     const zz=z+rr(-w*.43,w*.43),yy=y+rr(.65,h-.75);
+     if(openings.some(o=>Math.abs(yy-o.y)<o.h*.5+.15&&Math.abs(zz-o.z)<o.w*.5+.16))continue;
+     put(x+side*.173,yy,zz,.024,rr(.10,.39),rr(.18,.52),M.STONE,shade([.65,.63,.58],.07));
+   }
+   return;
  }
  for(let cy=0;cy<h;){let H=rr(.29,.56),pos=-w*.5;while(pos<w*.5){let W=Math.min(w*.5-pos,rr(.45,1.12));if(W<.13)break;let yy=y+cy+H*.49,zz=z+pos+W*.5;const rim=rnd();let tint=shade(rim<.10?[.60,.61,.58]:rim<.31?[.74,.70,.62]:[.78,.75,.67],.065);
- put(x+side*rr(.03,.15),yy,zz,rr(.18,.31),H*.91,W*.98,M.STONE,tint,rr(-.015,.015),.83);pos+=W+rr(.006,.022)}cy+=H+rr(.012,.04)}
+ const hole=openings.some(g=>Math.abs(yy-g.y)<(H*.91+g.h)*.51+.03&&Math.abs(zz-g.z)<(W*.98+g.w)*.51+.025);
+ if(!hole){
+   if(touch)put(x+side*rr(.075,.16),yy,zz,rr(.16,.23),H*.91,W*.98,M.STONE,tint,rr(-.015,.015),.79);
+   else chippedStone(x+side*.055,yy,zz,W*.95,H*.90,side,tint);
+ }
+ pos+=W+rr(.006,.022)}cy+=H+rr(.012,.04)}
 }
 function windowOnFront(x,y,z,side,short=false){
  const h=short?.95:1.33,w=short?.65:.82;
@@ -145,46 +186,57 @@ function ivy(front,base,z,side,h){
 }
 function house(side,z,w,d,h,variation){
  const offset=rr(.0,.40),cx=bends(z)+side*(3.68+w*.5+.12+offset),y=targetRoad(z)-.17,front=cx-side*w*.5-side*.025;
+ // The outward direction points into the street, opposite the side of the building.
+ const facadeSide=-side;
  const pl=variation===1,base=variation===2?[.80,.78,.71]:[.82,.79,.72];
+ const openings=[],windows=[];
+ const doorZ=z+rr(-.55,.55),doorWidth=variation===2?2.4:1.65,doorHeight=variation===2?3.5:2.55;
+ openings.push({y:y+doorHeight*.47,z:doorZ,w:doorWidth*.88,h:doorHeight*.95});
+ for(let level=1;level<4;level++){
+   let yy=y+level*2.3+.4;if(yy+1>y+h-.75)break;
+   for(let j of [-1,1]){
+     let zz=z+j*d*.25+rr(-.15,.15),short=level===3;
+     windows.push([yy,zz,short]);
+     openings.push({y:yy,z:zz,w:short?.80:1.03,h:short?1.06:1.49});
+   }
+ }
  // True building volume: side elevations, rear, corner buttresses
- put(cx,y+h*.48,z,w*.89,h*.96,d*.94,pl?M.PLASTER:M.DARK,shade(base,.08));
+ put(cx,y+h*.48,z,w*.89,h*.96,d*.94,pl?M.PLASTER:M.DARK,shade(pl?base:[.48,.47,.44],.045));
  // front relief masonry: not just a repeated UV brick texture
- stoneWallFace(front,y,z,d,h,side,pl);
+ stoneWallFace(front,y,z,d,h,facadeSide,pl,openings);
  for(let end of [-1,1]){
    let zz=z+end*d*.5,sideWall=pl?M.PLASTER:M.STONE;
    put(cx,y+h*.48,zz,w*.94,h*.96,.31,sideWall,shade(base,.1));
    for(let n=0;n<5;n++){let yy=y+rr(.5,h-1),xx=cx+rr(-w*.33,w*.33);if(rnd()<.5)put(xx,yy,zz+end*.17,rr(.26,.55),rr(.15,.36),.10,M.STONE,shade([.76,.73,.66],.07))}
  }
  // robust carved limestone quoins, each has a non-repeating size
- for(const zz of [z-d*.48,z+d*.48])for(let ht=.28;ht<h;ht+=.62){put(front+side*.12,y+ht,zz,.42,rr(.36,.55),rr(.54,.74),M.TRIM,shade([.76,.74,.68],.07));}
+ for(const zz of [z-d*.48,z+d*.48])for(let ht=.28;ht<h;ht+=.62){put(front+facadeSide*.12,y+ht,zz,.42,rr(.36,.55),rr(.54,.74),M.TRIM,shade([.76,.74,.68],.07));}
  // heavy stringcourses / rustic cornice with projecting shadows
- for(let ht=2.75;ht<h-1.1;ht+=2.8)put(front+side*.20,y+ht,z,.35,.14,d+.25,M.TRIM,shade([.86,.82,.72],.1));
- put(front+side*.20,y+h-.2,z,.53,.29,d+.5,M.TRIM,[.87,.85,.78]);
+ for(let ht=2.75;ht<h-1.1;ht+=2.8)put(front+facadeSide*.20,y+ht,z,.35,.14,d+.25,M.TRIM,shade([.86,.82,.72],.1));
+ put(front+facadeSide*.20,y+h-.2,z,.53,.29,d+.5,M.TRIM,[.87,.85,.78]);
  // window distribution: real panels, shutters, niches
- for(let level=1;level<4;level++){let yy=y+level*2.3+.4;if(yy+1>y+h-.75)break;
-   for(let j of [-1,1]){let zz=z+j*d*.25+rr(-.15,.15);windowOnFront(front,yy,zz,side,level===3);}
- }
- portal(front,y,z+rr(-.55,.55),side,variation===2);
+ for(const [yy,zz,short] of windows)windowOnFront(front,yy,zz,facadeSide,short);
+ portal(front,y,doorZ,facadeSide,variation===2);
  roof(cx,y+h,z,w,d,rr(1.2,2));
  // chimney and chimney rim
  if(rnd()<.80){let tx=cx+rr(-w*.25,w*.25),tz=z+rr(-d*.3,d*.3);
    put(tx,y+h+2.0,tz,.9,2.4,.8,M.STONE,[.93,.84,.69]);put(tx,y+h+3.2,tz,1.08,.22,.96,M.TRIM,[.81,.76,.68]);}
  // roof braces, hanging terracotta flower pot, plants
  if(rnd()<.82){let yy=y+rr(2.5,3.2),zz=z+rr(-d*.3,d*.3);
-   put(front+side*.44,yy,zz,.73,.17,.84,M.TRIM,[.72,.72,.63]);
-   put(front+side*.55,yy+.29,zz,.42,.47,.47,M.ROOF,[.76,.66,.58]);
+   put(front+facadeSide*.44,yy,zz,.73,.17,.84,M.TRIM,[.72,.72,.63]);
+   put(front+facadeSide*.55,yy+.29,zz,.42,.47,.47,M.ROOF,[.76,.66,.58]);
    for(let n=0;n<7;n++){
-     foliage(front+side*.55+rr(-.11,.11),yy+.62+rr(-.1,.18),zz+rr(-.2,.2),.12,.26,.2,[.48,.63,.38]);
-     if(n<4)put(front+side*.61+rr(-.1,.1),yy+.75+rr(-.03,.12),zz+rr(-.2,.2),.09,.09,.09,M.FLOWER,pick([[1,.59,.48],[.89,.79,.46],[.85,.56,.66]]));
+     foliage(front+facadeSide*.55+rr(-.11,.11),yy+.62+rr(-.1,.18),zz+rr(-.2,.2),.12,.26,.2,[.48,.63,.38]);
+     if(n<4)put(front+facadeSide*.61+rr(-.1,.1),yy+.75+rr(-.03,.12),zz+rr(-.2,.2),.09,.09,.09,M.FLOWER,pick([[1,.59,.48],[.89,.79,.46],[.85,.56,.66]]));
    }
  }
- if(rnd()<.74)ivy(front,y+rr(.4,1.0),z+rr(-d*.35,d*.35),side,rr(3.5,7.3));
+ if(rnd()<.74)ivy(front,y+rr(.4,1.0),z+rr(-d*.35,d*.35),facadeSide,rr(3.5,7.3));
  // warm wrought iron lanterns: these produce emissive bloom in the shader
  for(let n=0;n<(z<11?1:0);n++){
    let ly=y+rr(2.1,2.8),lz=z+rr(-d*.38,d*.38);
-   put(front+side*.36,ly+.30,lz,.62,.09,.07,M.IRON,[.32,.31,.28]);
-   put(front+side*.64,ly-.05,lz,.28,.45,.28,M.GLASS,[.94,.70,.40]);
-   put(front+side*.63,ly+.25,lz,.36,.11,.37,M.IRON,[.30,.25,.20]);
+   put(front+facadeSide*.36,ly+.30,lz,.62,.09,.07,M.IRON,[.32,.31,.28]);
+   put(front+facadeSide*.64,ly-.05,lz,.28,.45,.28,M.GLASS,[.94,.70,.40]);
+   put(front+facadeSide*.63,ly+.25,lz,.36,.11,.37,M.IRON,[.30,.25,.20]);
  }
 }
 for(const b of houseBlueprints)house(...b);
@@ -231,6 +283,23 @@ for(let i=0;i<(touch?350:1000);i++){
  if(rnd()<.66)foliage(x,y+.17,z,rr(.07,.13),rr(.35,.75),.06,shade([.42,.57,.33],.12),rr(-3,3));
  else put(x,y+.15,z,rr(.12,.45),rr(.06,.22),rr(.17,.5),M.STONE,shade([.74,.70,.57],.18),rr(-1,1));
 }
+
+// Pedestrian-scale street furniture near the walls: wooden barrels and planters.
+for(const [z,side] of [[21,1],[11,-1],[-4,1],[-16,-1],[-30,1]]){
+ const x=bends(z)+side*3.12,y=targetRoad(z);
+ beam([x,y+.26,z],[x,y+1.02,z],.31,M.WOOD,shade([.45,.32,.22],.07),9);
+ for(const v of [.27,.84])for(let k=0;k<11;k++){
+   let a=k*Math.PI*2/11,b=(k+1)*Math.PI*2/11;
+   beam([x+.325*Math.cos(a),y+v,z+.325*Math.sin(a)],
+        [x+.325*Math.cos(b),y+v,z+.325*Math.sin(b)],
+        .025,M.IRON,[.29,.28,.25],5);
+ }
+ const px=x-side*.58,pz=z+.72;
+ put(px,y+.26,pz,.56,.43,.80,M.STONE,shade([.72,.69,.63],.055));
+ put(px,y+.49,pz,.48,.09,.73,M.MOSS,[.30,.28,.22]);
+ for(let k=0;k<15;k++)foliage(px+rr(-.18,.18),y+.55+rr(.02,.40),pz+rr(-.25,.25),rr(.12,.20),rr(.18,.36),.08,shade([.37,.47,.26],.11),rr(-2,2));
+}
+
 // Some drifting dust/pollen represented as tiny emissive leaves.
 for(let k=0;k<(touch?120:420);k++){
  let z=rr(-51,32),x=bends(z)+rr(-7.4,7.4),y=targetRoad(z)+rr(1,9);
@@ -382,8 +451,8 @@ fn lightMaterial(albedo:vec3f,p:vec3f,n:vec3f,mat:f32,shadow:f32,rough:f32)->vec
  let V=normalize(U.camera.xyz-p);
  let N=normalize(n);
  let sky=max(0.,N.y*.5+.5);
- let ambient=mix(vec3f(.14,.17,.21),vec3f(.33,.36,.39),sky);
- let bounce=vec3f(.12,.095,.071)*(1.-sky);
+ let ambient=mix(vec3f(.095,.12,.16),vec3f(.24,.27,.30),sky);
+ let bounce=vec3f(.085,.065,.048)*(1.-sky);
  let sunlight=vec3f(1.10,.89,.68)*max(dot(N,L),0.)*shadow*U.sunlight.w;
  var c=albedo*(ambient+bounce+sunlight);
  let H=normalize(V+L);
@@ -392,8 +461,8 @@ fn lightMaterial(albedo:vec3f,p:vec3f,n:vec3f,mat:f32,shadow:f32,rough:f32)->vec
  if(mat==8.){c+=vec3f(.020,.030,.030);}
  if(mat==12.){c+=albedo*.09;}
  let haze=1.-exp(-max(0.,d-12.)*.006);
- let air=mix(vec3f(.41,.49,.57),vec3f(.62,.61,.55),clamp((p.y+3.)/35.,0.,1.));
- return mix(c,air,min(haze*.45,.27));
+ let air=mix(vec3f(.30,.38,.44),vec3f(.53,.51,.47),clamp((p.y+3.)/35.,0.,1.));
+ return mix(c,air,min(haze*.27,.16));
 }
 @fragment fn fsMain(i:Out)->@location(0) vec4f{
  let mat=i.material;
@@ -450,7 +519,7 @@ fn lightMaterial(albedo:vec3f,p:vec3f,n:vec3f,mat:f32,shadow:f32,rough:f32)->vec
 }
 @fragment fn fsSky(@builtin(position) q:vec4f)->@location(0) vec4f{
  let uv=q.xy/U.resolution.xy;let a=clamp(uv.y,0.,1.);
- var color=mix(vec3f(.67,.56,.45),vec3f(.29,.44,.60),smoothstep(.22,.97,1.-a));
+ var color=mix(vec3f(.59,.51,.43),vec3f(.21,.34,.48),smoothstep(.22,.97,1.-a));
  let streaks=fbm(vec3f(uv.x*3.5,a*4.,U.camera.w*.004));
  let horizon=smoothstep(.55,.82,a);
  color=mix(color,vec3f(.73,.64,.52),horizon*.23);
@@ -482,6 +551,7 @@ fn aces(x:vec3f)->vec3f{return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),vec3f
  }}
  c+=b/max(.01,weight)*.06;
  c=aces(c*P.exposure.x);
+ c=pow(c,vec3f(1.23));
  let v=1.-.24*pow(length((uv-.5)*vec2f(1.00,1.13)),1.7);
  c*=v;
  // output linear->sRGB through gamma encoded output to unorm swapchain.
@@ -572,7 +642,7 @@ async function main(){
    colorTarget=dev.createTexture({size:[w,h],format:'rgba16float',usage:TU.RENDER_ATTACHMENT|TU.TEXTURE_BINDING});
    depthTarget=dev.createTexture({size:[w,h],format:'depth24plus',usage:TU.RENDER_ATTACHMENT});
    postBG=dev.createBindGroup({layout:postLayout,entries:[{binding:0,resource:colorTarget.createView()},{binding:1,resource:smp},{binding:2,resource:{buffer:bPost}}]});
-   q.writeBuffer(bPost,0,new Float32Array([w,h,1/w,1/h,0.83,0,0,0]));pixels=w*h;
+   q.writeBuffer(bPost,0,new Float32Array([w,h,1/w,1/h,0.87,0,0,0]));pixels=w*h;
  }
  const camera={x:bends(24),y:targetRoad(24)+1.72,z:24,yaw:0,pitch:.015};
  const light=[-.58,.79,-.42];const sunPos=[-38,66,-55],look=[0,2,-13];
