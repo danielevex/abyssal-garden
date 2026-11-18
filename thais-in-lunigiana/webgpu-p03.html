@@ -11,12 +11,12 @@
 </head>
 <body>
 <div id="stage"></div><div id="wash"></div><div id="progress"></div>
-<div id="brand"><small>Cozy Paw Worlds · WebGPU P02</small><b>Thais in Lunigiana</b></div>
+<div id="brand"><small>Cozy Paw Worlds · WebGPU P03</small><b>Thais in Lunigiana</b></div>
 <div id="top"><button id="quality" type="button">Qualità: Alta</button><button id="menu" type="button">☰ Menu</button></div>
 <div id="hud"><strong>La via della Torre</strong><span>WASD · Mouse · Shift per correre · Esc per il menu</span><em id="stats">WebGPU · in preparazione</em></div>
 <div id="credit"><b>Verrucola</b>ispirato ai borghi della Lunigiana</div>
 <div id="touch"><div id="stick"><div id="nub"></div></div><div id="touchLabel">Trascina per guardare ↗</div></div><div id="reticle"></div>
-<div id="overlay"><div id="panel"><div class="eyebrow">Lunigiana · un borgo generato dalla matematica</div><h1>Thais <i>in</i><br>Lunigiana</h1><h2>La via della Torre</h2><p>La luce del pomeriggio attraversa i vicoli in pietra, il vento muove le fronde dei castagni e un antico borgo prende forma. Una prima passeggiata in un nuovo mondo procedurale.</p><button id="start" type="button">✦ Esplora il borgo</button><div id="note">Prototipo nativo WebGPU, completamente indipendente dalla versione WebGL. Ispirato a Verrucola, non una ricostruzione topografica. Thais giocabile e missioni arriveranno dopo la valutazione dell'ambiente.</div></div></div>
+<div id="overlay"><div id="panel"><div class="eyebrow">Lunigiana · un borgo generato dalla matematica</div><h1>Thais <i>in</i><br>Lunigiana</h1><h2>La via della Torre</h2><p>La luce del pomeriggio attraversa i vicoli in pietra, il vento muove le fronde dei castagni e un antico borgo prende forma. Una prima passeggiata in un nuovo mondo procedurale.</p><button id="start" type="button">✦ Esplora il borgo</button><div id="note">Prototipo WebGPU P03: materiali generati sulla GPU con la metodologia di Abyssal Garden (mipmap, triplanar e normali). Ispirato a Verrucola, non una ricostruzione topografica. Thais giocabile e missioni arriveranno dopo la valutazione dell'ambiente.</div></div></div>
 <div id="status">Generazione procedurale in corso…</div><div id="failure" role="alert"></div>
 <script type="module">
 /* Thais in Lunigiana — native WebGPU village renderer.
@@ -48,7 +48,7 @@ function norm(a){let l=Math.hypot(...a)||1;return a.map(x=>x/l)};
 function poly(a,b,c,color,material=10,ao=1){const n=norm(cross(minus(b,a),minus(c,a)));for(const p of [a,b,c])mesh.push(...p,...n,0,0,...color,material)}
 function quad(a,b,c,d,color,material=10){poly(a,b,c,color,material);poly(a,c,d,color,material)}
 function beam(a,b,r,material,tint=[1,1,1],faces=7){let dir=minus(b,a),len=Math.hypot(...dir);if(len<.01)return;dir=norm(dir);let side=norm(cross(dir,Math.abs(dir[1])>.92?[1,0,0]:[0,1,0])),up=cross(dir,side);for(let i=0;i<faces;i++){let t=i*2*Math.PI/faces,u=(i+1)*2*Math.PI/faces;let q1=side.map((v,j)=>v*Math.cos(t)*r+up[j]*Math.sin(t)*r),q2=side.map((v,j)=>v*Math.cos(u)*r+up[j]*Math.sin(u)*r);const f=(point,offset)=>point.map((v,j)=>v+offset[j]);quad(f(a,q1),f(a,q2),f(b,q2),f(b,q1),tint,material)}}
-function arch(cx,cy,cz,outer,inner,depth,material,blocks=12){for(let i=0;i<blocks;i++){const a=Math.PI*i/blocks,b=Math.PI*(i+1)/blocks;const xo=Math.cos(a)*outer,yo=Math.sin(a)*outer,xi=Math.cos(a)*inner,yi=Math.sin(a)*inner;const XO=Math.cos(b)*outer,YO=Math.sin(b)*outer,XI=Math.cos(b)*inner,YI=Math.sin(b)*inner;let c=shade([.92,.85,.73],.21);let p=(x,y,z)=>[cx+x,cy+y,cz+z];quad(p(xo,yo,-depth/2),p(XO,YO,-depth/2),p(XI,YI,-depth/2),p(xi,yi,-depth/2),c,material);quad(p(xi,yi,depth/2),p(XI,YI,depth/2),p(XO,YO,depth/2),p(xo,yo,depth/2),c,material);quad(p(xi,yi,-depth/2),p(XI,YI,-depth/2),p(XI,YI,depth/2),p(xi,yi,depth/2),c,material);quad(p(xo,yo,depth/2),p(XO,YO,depth/2),p(XO,YO,-depth/2),p(xo,yo,-depth/2),c,material)}}
+function arch(cx,cy,cz,outer,inner,depth,material,blocks=12){for(let i=0;i<blocks;i++){const a=Math.PI*i/blocks,b=Math.PI*(i+1)/blocks;const xo=Math.cos(a)*outer,yo=Math.sin(a)*outer,xi=Math.cos(a)*inner,yi=Math.sin(a)*inner;const XO=Math.cos(b)*outer,YO=Math.sin(b)*outer,XI=Math.cos(b)*inner,YI=Math.sin(b)*inner;let c=shade([.78,.75,.68],.065);let p=(x,y,z)=>[cx+x,cy+y,cz+z];quad(p(xo,yo,-depth/2),p(XO,YO,-depth/2),p(XI,YI,-depth/2),p(xi,yi,-depth/2),c,material);quad(p(xi,yi,depth/2),p(XI,YI,depth/2),p(XO,YO,depth/2),p(xo,yo,depth/2),c,material);quad(p(xi,yi,-depth/2),p(XI,YI,-depth/2),p(XI,YI,depth/2),p(xi,yi,depth/2),c,material);quad(p(xo,yo,depth/2),p(XO,YO,depth/2),p(XO,YO,-depth/2),p(xo,yo,-depth/2),c,material)}}
 
 function castleTower(cx,cy,cz,width=7,height=15){
  const base=[.88,.87,.79];put(cx,cy+height*.5,cz,width,height,width,M.DARK,base);
@@ -65,10 +65,10 @@ function castleTower(cx,cy,cz,width=7,height=15){
 
 // Raised narrow road formed from irregular flagstones, not repeating painted squares.
 status.textContent='Scultura della strada e delle case…';bar.style.width='15%';
-for(let z=29;z>-55;z-=.42){let x=-3.45;while(x<3.48){let w=rr(.22,.68),dz=rr(.30,.55),xx=bends(z)+x+w*.5+rr(-.09,.09),yy=targetRoad(z)+rr(-.018,.028);const c=shade(pick([[.82,.82,.76],[.72,.74,.7],[.65,.67,.62],[.90,.86,.76],[.79,.77,.7]]),.18);pebble(xx,yy,z+rr(-.12,.12),w*.9,rr(.045,.09),dz,c,rr(-.07,.07));x+=w+rr(.005,.055)}}
+for(let z=29;z>-55;z-=.42){let x=-3.45;while(x<3.48){let w=rr(.22,.68),dz=rr(.30,.55),xx=bends(z)+x+w*.5+rr(-.09,.09),yy=targetRoad(z)+rr(-.018,.028);const c=shade(pick([[.69,.68,.64],[.65,.65,.61],[.61,.63,.60],[.73,.69,.63],[.68,.65,.60]]),.068);pebble(xx,yy,z+rr(-.12,.12),w*.9,rr(.045,.09),dz,c,rr(-.07,.07));x+=w+rr(.005,.055)}}
 // Irregular central ruts and edge gutters; grass in mortar joints.
 for(let z=29;z>-55;z-=.92){for(const side of [-1,1]){
- let x=bends(z)+side*3.68,y=targetRoad(z)+.015;put(x,y,z,rr(.25,.4),.15,rr(.72,1.15),M.TRIM,shade([.65,.65,.58],.18),rr(-.12,.12));
+ let x=bends(z)+side*3.68,y=targetRoad(z)+.015;put(x,y,z,rr(.25,.4),.15,rr(.72,1.15),M.TRIM,shade([.66,.64,.59],.07),rr(-.12,.12));
  if(rnd()<.65){let r=rr(.06,.14);foliage(x+side*rr(-.14,.11),y+.11,z, r,rr(.23,.55),r,[.48,.66,.39]);}
  }}
 // Coarse terrain with sculpted ridges, cambered paths, embedded rocks and earth colors.
@@ -244,6 +244,9 @@ function lookAt(eye,center,up){let z=norm(vsub(eye,center)),x=norm(cross(up,z)),
 function persp(fov,aspect,n,f){let t=1/Math.tan(fov/2);return new Float32Array([t/aspect,0,0,0,0,t,0,0,0,0,f/(n-f),-1,0,0,f*n/(n-f),0])}
 function ortho(l,r,b,t,n,f){return new Float32Array([2/(r-l),0,0,0,0,2/(t-b),0,0,0,0,1/(n-f),0,-(r+l)/(r-l),-(t+b)/(t-b),n/(n-f),1])}
 
+/* Texture-baking WGSL adapted from Abyssal Garden by Maksymilian Dendura,
+   copyright (c) 2026, licensed MIT; see the parent project and LICENSE.
+   The surrounding architectural material shader is new to Thais in Lunigiana. */
 const detailShader=/* wgsl */`
 fn ss(a: f32, b: f32, x: f32) -> f32 { let t = clamp((x - a) / (b - a), 0., 1.); return t * t * (3. - 2. * t); }
 fn h31(p: vec3f) -> f32 { var q = fract(p * vec3f(.1031, .1030, .0973)); q += dot(q, q.yzx + 33.33); return fract((q.x + q.y) * q.z); }
