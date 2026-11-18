@@ -717,12 +717,12 @@ fn tri(p: vec3f, n: vec3f, s: f32) -> TP {
     alb*=grit;
     gloss=.055;bump=1.3;
     sgro=-ss(.12,.0,abs(fract(i.op.y*1.7)-.5))*.15;
-  } else if (mat == 2) {
+  } else if (mat == 2 || mat == 9) {
     // Sandstone, lime mortar, dark windows, terracotta roof tiles.
     alb = mix(vec3f(.27,.255,.22),vec3f(.64,.60,.52),ss(.22,.77,A.h*.65+B.h*.35))*(.74+.40*C.h);
     let mortar=abs(fract(i.op.y*.82+sk.a*.07)-.5);
     alb=mix(alb,vec3f(.19,.18,.15),.40*(1.-ss(.016,.052,mortar)));
-    let terracotta=1.-ss(.09,.22,abs(i.ao-.73));
+    let terracotta=select(0.,1.-ss(.09,.22,abs(i.ao-.73)),mat==2);
     alb=mix(alb,vec3f(.57,.285,.125)*(.80+.30*B.h),terracotta*.94);
     alb=mix(alb,vec3f(.06,.054,.046),1.-ss(.15,.38,i.ao));
     gloss=.08;bump=.58;
@@ -1421,7 +1421,7 @@ function makeWorld(D, T, flyPts, POSES) {
     }
   }
   // Monumental stone gate near the start, with individual radial voussoirs.
-  solid(12,0,gy(0,-5.6)-.10,-5.6,1,qAxis(0,1,0,.06),2,.31,1,0);
+  solid(12,0,gy(0,-5.6)-.10,-5.6,1,qAxis(0,1,0,.06),9,.31,1,0);
     // Stone-paved medieval lane and dry-stone boundaries follow real terrain.
   // Small pebble geometry uses Abyssal's cullable, low-LOD chunk slot.
   rseed(2050);
