@@ -106,7 +106,8 @@ function makeCanvasMap(type,res=512){
  return tex;
 }
 status.textContent='Preparazione dei materiali in pietra…';
-const maps={stone:makeCanvasMap('stone'),cobble:makeCanvasMap('cobble'),roof:makeCanvasMap('roof'),wood:makeCanvasMap('wood')};
+const TEXRES=mobile?256:512;
+const maps={stone:makeCanvasMap('stone',TEXRES),cobble:makeCanvasMap('cobble',TEXRES),roof:makeCanvasMap('roof',TEXRES),wood:makeCanvasMap('wood',TEXRES)};
 const stone=new THREE.MeshStandardMaterial({map:maps.stone,color:0xd5cbb0,roughness:1});
 const darkstone=new THREE.MeshStandardMaterial({map:maps.stone,color:0xb6ae98,roughness:1});
 const accentstone=new THREE.MeshStandardMaterial({map:maps.stone,color:0xe2d1b2,roughness:1});
@@ -453,11 +454,11 @@ window.addEventListener('resize',fit);fit();
 function toggleMenu(open){menu=open;$('intro').classList.toggle('hide',!open);$('hud').style.display=open?'none':'block';$('menuButton').style.display=open?'none':'block';$('quality').style.display=open?'none':'block';$('touch').style.display=!open&&mobile?'block':'none';$('reticle').style.display=!open&&!mobile?'block':'none';if(open)document.exitPointerLock?.()}
 $('start').onclick=()=>{
  started=true;toggleMenu(false);
- if(!mobile)renderer.domElement.requestPointerLock?.().catch?.(()=>{});
+ if(!mobile){const lock=renderer.domElement.requestPointerLock?.();lock?.catch?.(()=>{});}
 };$('menuButton').onclick=()=>toggleMenu(true);
 $('quality').textContent=high?'Dettaglio: Alto':'Dettaglio: Mobile';
-$('quality').onclick=()=>{high=!high;renderer.shadowMap.enabled=high;renderer.setPixelRatio(Math.min(devicePixelRatio,high?1.7:1.05));fit();$('quality').textContent=high?'Dettaglio: Alto':'Dettaglio: Mobile'};
-renderer.domElement.addEventListener('click',()=>{if(started&&!menu&&!mobile&&!document.pointerLockElement)renderer.domElement.requestPointerLock?.().catch?.(()=>{})});
+$('quality').onclick=()=>{high=!high;renderer.shadowMap.enabled=high;sun.castShadow=high;renderer.setPixelRatio(Math.min(devicePixelRatio,high?1.7:1.05));fit();$('quality').textContent=high?'Dettaglio: Alto':'Dettaglio: Mobile'};
+renderer.domElement.addEventListener('click',()=>{if(started&&!menu&&!mobile&&!document.pointerLockElement){const lock=renderer.domElement.requestPointerLock?.();lock?.catch?.(()=>{})}});
 window.addEventListener('mousemove',e=>{if(document.pointerLockElement===renderer.domElement){mouseDX+=e.movementX;mouseDY+=e.movementY}});
 document.addEventListener('pointerlockchange',()=>{
  if(started&&!mobile&&!document.pointerLockElement&&!menu)toggleMenu(true);
