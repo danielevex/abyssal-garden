@@ -22,6 +22,10 @@ const CLEARS = [
  [0,-36,0,-36,18,6], [0,20,0,20,15,6],
  [0,-68,0,-68,18,7], [0,65,0,65,14,7]
 ];
+// Collidable medieval buildings share the same canonical footprints as their geometry.
+const HAMLET_SITES=[[7,-14,1.00],[-9,-20,1.06],[14,-32,.90],[-13,-41,1.15],
+ [8,-52,.95],[-16,-64,1.08],[19,-68,.93],[8,13,1.05],
+ [-10,19,.90],[16,33,1.13],[-17,40,1.02]];
 const PURPLE = [6, 84];
 const zoneP = (x, z) => sstep(44, 26, hypot(x - PURPLE[0], z - PURPLE[1]));
 const MAGENTA = [[14, 6, 13], [-4, 20, 9], [6, 84, 30], [-58, 8, 10], [50, 30, 12], [8, -70, 10], [-12, -98, 9], [-36, 44, 9], [-46, -60, 9], [24, 42, 8], [-56, 26, 9], [-44, 38, 8], [-10, 44, 8], [12, 24, 8], [-50, -45, 8]];
@@ -216,9 +220,7 @@ function makeWorld(D, T, flyPts, POSES) {
   }
   // Borgo: stone houses at terrain height, never floating or underwater.
   rseed(2041);
-  const homes=[[7,-14,1.00],[-9,-20,1.06],[14,-32,.90],[-13,-41,1.15],
-    [8,-52,.95],[-16,-64,1.08],[19,-68,.93],[8,13,1.05],
-    [-10,19,.90],[16,33,1.13],[-17,40,1.02]];
+  const homes=HAMLET_SITES;
   for(const [x,z,scale] of homes){
     const y=gy(x,z);if(y>-9)continue;
     solid(11,x,y-.14,z,scale,qAxis(0,1,0,rr(-.19,.19)),2,rnd(),1,0);
