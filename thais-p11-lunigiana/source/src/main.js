@@ -629,13 +629,13 @@ function collide() {
     if(toward<0){F[VX]-=nx*toward;F[VZ]-=nz*toward;}
   };
   for(const [hx,hz,scale] of HAMLET_SITES){
-    // Ignore upper levels for elevated viewpoints; house radius includes corners.
-    if(F[CY] < 2.0)collideCircle(hx,hz,4.13*scale);
+    collideCircle(hx,hz,4.13*scale);
   }
   for(const side of [-1,1])collideCircle(side*1.98,-5.6,.92);
 
 }
 
+let landJumpHeld=false;
 function frame(now) {
   requestAnimationFrame(frame);
   const dtr = now - F[LAST]; F[LAST] = now;
@@ -674,7 +674,12 @@ function frame(now) {
     const sp = ks || tN > 1 ? 6.0 : 3.3, k = 1 - exp(-dt * 7.0);
     const mf = tId >= 0 ? 0.7 : kf-kb, mr = kr-kl, sy=sin(yaw),cw=cos(yaw);
     const vx=F[VX]+((sy*mf+cw*mr)*sp-F[VX])*k;
-    const vy=max(-9.,min(4.5,F[VY]-15.*dt+(ku?14.*dt:0.)));
+    let vy=max(-9.,F[VY]-16.*dt);
+    if(ku&&!landJumpHeld){
+      sd(0);
+      if(CS[0]>-CR-.35)vy=5.2;
+    }
+    landJumpHeld=!!ku;
     const vz=F[VZ]+((-cw*mf+sy*mr)*sp-F[VZ])*k;
     let x = F[CX] + vx * dt, y = F[CY] + vy * dt, z = F[CZ] + vz * dt;
     const rad = sqrt(x * x + z * z); if (rad > 150) { x *= 150 / rad; z *= 150 / rad; }
