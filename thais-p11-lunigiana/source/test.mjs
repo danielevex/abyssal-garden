@@ -19,6 +19,9 @@ for(const name of ['meshChestnutTrunk','meshVillageHouse','meshMedievalGate'])
  assert(files['main.js'].includes('function '+name+'()'),'missing geometry: '+name);
 for(const entry of ['r.setPipeline(pFish);','r.setPipeline(pManta);','r.setPipeline(pSurf);','r.setPipeline(pBub);','r.setPipeline(pWater);'])
  assert(!files['main.js'].includes(entry),'marine rendering remains: '+entry);
+// Regression: removing a render pipeline must also remove every resize/bind-group reference.
+for(const name of ['pRB','pRays','pFish','pManta','pSurf','pBub','pGl','pSnow','pWater'])
+ assert(!new RegExp('\\b'+name+'\\b').test(files['main.js']),'orphaned removed pipeline: '+name);
 assert(files['audio.js'].includes('forestBirdTimer'),'land ambient sound absent');
 assert(!files['quality.js'].includes('localStorage.abyssal'),'settings are not isolated');
 let shaderCount=0,immutableWrites=[];
