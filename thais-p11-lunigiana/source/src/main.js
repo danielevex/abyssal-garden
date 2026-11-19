@@ -619,6 +619,21 @@ function collide() {
       if (vn > 0) { F[VX] -= gx * vn; F[VY] -= gy * vn; F[VZ] -= gz * vn; }
     }
   }
+  // Respect the new medieval buildings and the walk-through gate pillars.
+  const collideCircle=(cx,cz,rad)=>{
+    const dx=F[CX]-cx,dz=F[CZ]-cz,dist=Math.hypot(dx,dz);
+    if(dist>=rad)return;
+    const nx=dist>.001?dx/dist:1,nz=dist>.001?dz/dist:0;
+    F[CX]=cx+nx*rad;F[CZ]=cz+nz*rad;
+    const toward=F[VX]*nx+F[VZ]*nz;
+    if(toward<0){F[VX]-=nx*toward;F[VZ]-=nz*toward;}
+  };
+  for(const [hx,hz,scale] of HAMLET_SITES){
+    // Ignore upper levels for elevated viewpoints; house radius includes corners.
+    if(F[CY] < 2.0)collideCircle(hx,hz,4.13*scale);
+  }
+  for(const side of [-1,1])collideCircle(side*1.98,-5.6,.92);
+
 }
 
 function frame(now) {
