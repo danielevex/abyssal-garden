@@ -596,14 +596,16 @@ function render() {
 const CE = new Float64Array([0, 0, 0, .375, 0, 0, -.375, 0, 0, 0, .375, 0, 0, -.375, 0, 0, 0, .375, 0, 0, -.375]), CS = new Float64Array(7);
 const cv = (x, y, z) => { const b = CI[(x >> 2) + CN * ((y >> 2) + NY / 4 * (z >> 2))]; return b > 1 ? CG[b * 64 - 128 + (x & 3) + 4 * (y & 3) + 16 * (z & 3)] : b * 254 - 127; };
 function sd(j) {
-  const x = (F[CX] + CE[j * 3] - OX) / VS - CO, y = (F[CY] + CE[j * 3 + 1] - OY) / VS, z = (F[CZ] + CE[j * 3 + 2] - OZ) / VS - CO;
+  const x = (F[CX] + CE[j * 3] - OX) / VS - CO, y = (F[CY] - FOOT_OFFSET + CE[j * 3 + 1] - OY) / VS, z = (F[CZ] + CE[j * 3 + 2] - OZ) / VS - CO;
   const ix = x | 0, iy = y | 0, iz = z | 0, u = x - ix, v = y - iy, a = cv(ix, iy, iz), b = cv(ix, iy + 1, iz), c = cv(ix, iy, iz + 1), d = cv(ix, iy + 1, iz + 1);
   const p = a + (cv(ix + 1, iy, iz) - a) * u, q = b + (cv(ix + 1, iy + 1, iz) - b) * u, r = c + (cv(ix + 1, iy, iz + 1) - c) * u, s = d + (cv(ix + 1, iy + 1, iz + 1) - d) * u;
   const e = p + (q - p) * v; CS[j] = (e + (r + (s - r) * v - e) * (z - iz)) / 127;
 }
 // Moves the camera by F[MX..MZ] in steps shorter than its radius CR (so it can't pass through thin rock), pushing it
 // back out after each step and dropping velocity into the rock, so it slides along.
-const CR = 1.55;
+// Collision field distances are quantized to [-1,1] metres. Keep radius below that bound.
+// Eye is 1.65m above the ground, the collision sample is centered 1.20m below the eye.
+const CR = 0.45, FOOT_OFFSET = 1.20;
 function collide() {
   const n = floor(sqrt(F[MX] * F[MX] + F[MY] * F[MY] + F[MZ] * F[MZ]) / 0.4) + 1;
   for (let i = 0; i < n; i++) {
@@ -676,7 +678,7 @@ function frame(now) {
     let vy=max(-9.,F[VY]-16.*dt);
     if(ku&&!landJumpHeld){
       sd(0);
-      if(CS[0]>-CR-.35)vy=5.2;
+      if(CS[0]>-CR-.10)vy=5.2;
     }
     landJumpHeld=!!ku;
     const vz=F[VZ]+((-cw*mf+sy*mr)*sp-F[VZ])*k;
