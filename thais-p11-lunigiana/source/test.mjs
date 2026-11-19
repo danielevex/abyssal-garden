@@ -22,6 +22,17 @@ for(const entry of ['r.setPipeline(pFish);','r.setPipeline(pManta);','r.setPipel
 // Regression: removing a render pipeline must also remove every resize/bind-group reference.
 for(const name of ['pRB','pRays','pFish','pManta','pSurf','pBub','pGl','pSnow','pWater'])
  assert(!new RegExp('\\b'+name+'\\b').test(files['main.js']),'orphaned removed pipeline: '+name);
+// Regression against the P11 earthquake bug: the collision distance buffer
+// encodes at most 1m, so a radius >1m always triggers penetration correction.
+const physics=files['main.js'];
+const match=physics.match(/const CR\s*=\s*([\d.]+),\s*FOOT_OFFSET\s*=\s*([\d.]+)/);
+assert(match,'expected foot-level collision configuration');
+const radius=Number(match[1]),foot=Number(match[2]);
+assert(radius>0&&radius<.75,'radius must stay below compressed +/-1m SDF range');
+assert(foot>0&&foot<2,'feet must be sampled below eyes');
+assert(Math.abs(radius+foot-1.65)<.05,'eye height must remain near 1.65m');
+assert(physics.includes('F[CY] - FOOT_OFFSET + CE[j * 3 + 1]'),'terrain collisions must sample the feet');
+assert(radius-1<0,'a camera far from ground must not be pushed back');
 assert(files['audio.js'].includes('forestBirdTimer'),'land ambient sound absent');
 assert(!files['quality.js'].includes('localStorage.abyssal'),'settings are not isolated');
 let shaderCount=0,immutableWrites=[];
