@@ -26,7 +26,7 @@ device.addEventListener('uncapturederror', (e) => console.error('GPU: ' + e.erro
 // out of memory or a GPU timeout: reload a level lower, or on Low say what happened
 device.lost.then((l) => {
   if (l.reason === 'destroyed') return; // the page is closing
-  if (LV < 2) { keep('abyssal', LV + 1); location.reload(); }
+  if (LV < 2) { keep('thaisLunigiana11', LV + 1); location.reload(); }
   dead = body.className = 'l e'; $('s').textContent = 'The graphics device was lost. Reload the page to try again.';
 });
 const ctx = canvas.getContext('webgpu'), FMT = navigator.gpu.getPreferredCanvasFormat();
@@ -144,8 +144,8 @@ const SUN = (() => { const v = [-0.56, .83, -.24], l = hypot(...v); return v.map
 // ---------------------------------------------------------------- world generation
 await say('Sculpting the seabed…', 0.25, 1200);
 // marks a load in progress (quality.js); leaving the page before it ends is not a crash
-keep('abyssalLoad', 1);
-addEventListener('pagehide', () => keep('abyssalLoad', ''));
+keep('thaisLunigianaLoad11', 1);
+addEventListener('pagehide', () => keep('thaisLunigianaLoad11', ''));
 let D;
 {
   const prims = primBuffer();
@@ -639,7 +639,7 @@ function frame(now) {
       const end = k < 1 ? (det > DETMIN ? mid : PIXMIN) : det < 1 ? mid : top;
       pix *= k; if (k < 1 ? pix < end : pix > end) pix = end;
     } else { det *= sqrt(k); det = det < DETMIN ? DETMIN : det > 1 ? 1 : det; }
-    if (was !== pix + det) keep('abyssal', [LV, pix < top ? pix | 0 : '', det]); // nothing kept at full resolution
+    if (was !== pix + det) keep('thaisLunigiana11', [LV, pix < top ? pix | 0 : '', det]); // nothing kept at full resolution
     dynN = dynT = dynG = dynGN = 0; resize();
   }
   F[TIME] += dt;
@@ -726,7 +726,7 @@ const go = () => {
 };
 bDive.onclick = go; $('o').onclick = () => ui(true);
 // detail buttons: the current level is lit, the others reload the page with theirs
-$('q').querySelectorAll('button').forEach((b, i) => { if (i === 2 - LV) b.className = 'on'; else b.onclick = () => { keep('abyssal', 2 - i); location.reload(); }; });
+$('q').querySelectorAll('button').forEach((b, i) => { if (i === 2 - LV) b.className = 'on'; else b.onclick = () => { keep('thaisLunigiana11', 2 - i); location.reload(); }; });
 document.addEventListener('pointerlockchange', () => ui(!document.pointerLockElement));
 
 // draw the first frame and wait for the GPU to finish it (pipelines get compiled on first use) before the reveal
@@ -739,6 +739,6 @@ for(let i=0;i<shaderModules.length;i++){
 }
 await say('Il paesaggio prende luce…', 1, 400);
 render(); await Q.onSubmittedWorkDone();
-setTimeout(keep, 15e3, 'abyssalLoad', ''); // the load counts as survived after 15 s of frames
+setTimeout(keep, 15e3, 'thaisLunigianaLoad11', ''); // the load counts as survived after 15 s of frames
 ui(true);
 requestAnimationFrame((t) => { F[LAST] = t; requestAnimationFrame(frame); });
